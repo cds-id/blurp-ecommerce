@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { ChevronRight, Heart, Share2, Truck, ShieldCheck, RotateCcw, Star } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -33,6 +33,16 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
   const [showShipping, setShowShipping] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const { addItem } = useCart();
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
+
+  function handleImageMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = imageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoom({ active: true, x, y });
+  }
 
   const discount = product.originalPrice
     ? calculateDiscount(product.originalPrice, product.price)
@@ -70,11 +80,20 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
         <div className="grid grid-cols-2 gap-12">
           {/* Image Gallery - Airbnb Style */}
           <div className="space-y-4">
-            <div className="aspect-square rounded-xl overflow-hidden bg-surface-soft group">
-              <img 
-                src={imageVariants[activeImage]} 
+            <div
+              ref={imageRef}
+              className="aspect-square rounded-xl overflow-hidden bg-surface-soft cursor-crosshair"
+              onMouseMove={handleImageMouseMove}
+              onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
+            >
+              <img
+                src={imageVariants[activeImage]}
                 alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-200 ease-out"
+                style={{
+                  transform: zoom.active ? "scale(2)" : "scale(1)",
+                  transformOrigin: `${zoom.x}% ${zoom.y}%`,
+                }}
               />
             </div>
             <div className="grid grid-cols-4 gap-3">
