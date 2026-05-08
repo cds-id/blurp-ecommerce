@@ -227,12 +227,13 @@ only users, or generate one (e.g. email local part). Confirm migration.
 | Refresh token     | ✅ done  | high     |
 | OAuth Google      | partial  | medium   |
 | Addresses CRUD    | ✅ done  | high     |
-| Notif prefs       | missing  | low      |
+| Notif prefs       | ✅ done  | low      |
 | Orders pagination | ✅ done  | medium   |
-| Cancel order      | missing  | medium   |
-| Order events      | missing  | medium   |
-| Logout revocation | known    | low      |
-| Wishlist types    | unverified | low    |
+| Cancel order      | ✅ done  | medium   |
+| Reorder           | ✅ done  | medium   |
+| Order events      | ✅ done  | medium   |
+| Logout revocation | ✅ done  | low      |
+| Wishlist types    | ✅ fixed | low      |
 | Magic-link user row | ✅ resolved (username nullable in DB) | high |
 
 ---
@@ -259,3 +260,20 @@ Backend endpoints added in `blurp-engine`:
 All auth endpoints now return `refresh_token` in addition to `access_token`.
 Migration `20260508_003_add_user_addresses.sql` adds address table.
 Magic-link username issue resolved — `username` column already nullable in DB schema.
+
+## Resolved (2026-05-08, batch 2)
+
+- `GET/PUT /api/users/me/notifications` — notification preference CRUD
+- `POST /api/orders/{id}/cancel` — cancel pending orders (releases stock)
+- `POST /api/orders/{id}/reorder` — copy items back to cart
+- Order events timeline — `orders.order_events` table, returned in `GET /api/orders/{id}`
+- `OrderDetail` now includes `events[]` + `fulfillment` object
+- Logout revocation — JWT `jti` claim + Redis denylist (`jwt:deny:{jti}` with TTL)
+- Wishlist response shape — wrapped in `{items: [...]}` to match frontend `Wishlist` type
+
+Migrations added:
+- `20260508_004_add_notification_preferences.sql`
+- `20260508_005_order_events.sql`
+
+### Remaining
+- OAuth Google login (partial — needs Google client ID + routes)
