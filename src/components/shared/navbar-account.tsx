@@ -103,7 +103,7 @@ export function DesktopNavbarAccount() {
 
           <ul className="py-1">
             <MenuItem href="/profile" icon={User} label="Profil saya" onClick={() => setOpen(false)} />
-            <MenuItem href="/store/tracker" icon={Package} label="Pesanan saya" onClick={() => setOpen(false)} />
+            <MenuItem href="/store/orders" icon={Package} label="Pesanan saya" onClick={() => setOpen(false)} />
             <MenuItem href="/profile/addresses" icon={Package} label="Alamat" onClick={() => setOpen(false)} />
             {isAdmin && (
               <MenuItem href="/admin" icon={ShieldCheck} label="Panel admin" onClick={() => setOpen(false)} />

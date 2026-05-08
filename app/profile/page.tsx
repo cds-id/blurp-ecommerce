@@ -30,7 +30,7 @@ interface ProfileSection {
 
 const accountSections: ProfileSection[] = [
   {
-    href: "/store/tracker",
+    href: "/store/orders",
     icon: Package,
     title: "Pesanan saya",
     description: "Lacak status & lihat riwayat pesanan kamu.",

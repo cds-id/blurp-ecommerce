@@ -23,16 +23,17 @@ import { useCart } from "@/src/components/shared/cart-provider";
 
 interface DesktopProductDetailProps {
   product: Product;
+  defaultVariantId?: string | null;
 }
 
-export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
+export function DesktopProductDetail({ product, defaultVariantId }: DesktopProductDetailProps) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "");
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedCity, setSelectedCity] = useState("");
   const [showShipping, setShowShipping] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
-  const { addItem } = useCart();
+  const { addVariant } = useCart();
 
   const discount = product.originalPrice
     ? calculateDiscount(product.originalPrice, product.price)
@@ -260,13 +261,10 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
                 size="lg"
                 className="flex-1 rounded-lg font-semibold"
                 onClick={() => {
-                  addItem({
-                    productId: product.id,
-                    quantity,
-                    color: selectedColor || undefined,
-                    size: selectedSize || undefined,
-                  });
+                  if (!defaultVariantId) return;
+                  void addVariant({ variantId: defaultVariantId, quantity });
                 }}
+                disabled={!defaultVariantId}
               >
                 + Keranjang
               </Button>

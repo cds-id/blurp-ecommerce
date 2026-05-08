@@ -18,14 +18,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!detail) notFound();
 
   const product = toUiProductDetail(detail, categoryById);
+  const firstVariantId =
+    Array.isArray(detail.variants) && detail.variants.length > 0
+      ? // backend VariantDetail might be flattened or nested; both include an `id`.
+        (detail.variants[0] as unknown as { id?: string; variant?: { id?: string } }).id ??
+        (detail.variants[0] as unknown as { variant?: { id?: string } }).variant?.id ??
+        null
+      : null;
 
   return (
     <>
       <div className="hidden md:block">
-        <DesktopProductDetail product={product} />
+        <DesktopProductDetail product={product} defaultVariantId={firstVariantId} />
       </div>
       <div className="md:hidden">
-        <MobileProductDetail product={product} />
+        <MobileProductDetail product={product} defaultVariantId={firstVariantId} />
       </div>
     </>
   );

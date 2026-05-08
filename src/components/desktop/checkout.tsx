@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -23,21 +23,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { shippingOptions, cities } from "@/src/data/shipping";
+import { cities } from "@/src/data/shipping";
 import { cn, formatPrice } from "@/src/lib/utils";
 import { useCart } from "@/src/components/shared/cart-provider";
 import { SafeImage } from "@/src/components/shared/safe-image";
 import { saveLastOrder } from "@/src/data/mock-orders";
 import { SummaryRowSkeleton, Skeleton } from "@/src/components/shared/skeleton";
 import { useSimulatedLoading } from "@/src/hooks/use-simulated-loading";
+import { ordersApi, paymentsApi } from "@/src/lib/api";
+import type { ShippingOption } from "@/src/lib/api/orders";
+import { useAuth } from "@/src/hooks/use-auth";
 
 function normalizePhone(input: string) {
   return input.replace(/[^\d]/g, "");
 }
 
-function makeOrderId() {
-  const n = Math.floor(10000 + Math.random() * 90000);
-  return `ORD-${n}`;
+function shippingKey(opt: ShippingOption): string {
+  return `${opt.courier_code}:${opt.service_code}`;
 }
 
 const STEPS = [
@@ -49,6 +51,7 @@ const STEPS = [
 export function DesktopCheckout() {
   const router = useRouter();
   const cart = useCart();
+  const { isAuthenticated } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedShipping, setSelectedShipping] = useState("");
@@ -56,42 +59,126 @@ export function DesktopCheckout() {
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [shippingChoices, setShippingChoices] = useState<ShippingOption[]>([]);
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState<string | null>(null);
 
   const isSummaryLoading = useSimulatedLoading(700);
-  const items = useMemo(() => cart.items.filter((it) => Boolean(it.product)), [cart.items]);
-  const subtotal = useMemo(
-    () => items.reduce((sum, it) => sum + (it.product?.price ?? 0) * it.line.quantity, 0),
-    [items]
-  );
-  const totalUnits = useMemo(
-    () => items.reduce((sum, it) => sum + it.line.quantity, 0),
-    [items]
-  );
-  const shippingOpt = shippingOptions.find((s) => s.id === selectedShipping);
-  const shippingCost = shippingOpt?.price || 0;
+  const items = cart.lineItems;
+  const subtotal = cart.subtotal;
+  const totalUnits = cart.count;
+  const shippingOpt = shippingChoices.find((s) => shippingKey(s) === selectedShipping) ?? null;
+  const shippingCost = shippingOpt?.cost_idr ?? 0;
   const total = subtotal + shippingCost;
 
   const canProceed = () => {
-    if (step === 1) return Boolean(name && phone && email && address && selectedCity);
+    if (step === 1) return Boolean(name && phone && email && address && selectedCity && districtId);
     if (step === 2) return Boolean(selectedShipping);
     if (step === 3) return true;
     return false;
   };
 
-  const handleNext = () => {
-    if (step < 3) {
-      setStep((step + 1) as 1 | 2 | 3);
-    } else {
-      const orderId = makeOrderId();
+  const loadShippingOptions = async () => {
+    const cityObj = cities.find((c) => c.id === selectedCity);
+    if (!cityObj || !districtId) return;
+    setIsLoadingShipping(true);
+    setShippingError(null);
+    try {
+      if (isAuthenticated) {
+        // Logged-in: backend resolves origin + cart weight.
+        const quote = await ordersApi.shippingQuote({
+          shipping_address: {
+            name,
+            email,
+            phone: normalizePhone(phone),
+            street: address,
+            city: cityObj.name,
+            province: cityObj.province,
+            postal_code: postalCode || "00000",
+            country: "ID",
+            district_id: districtId,
+          },
+        });
+        setShippingChoices(quote.shipping_options);
+      } else {
+        // Guest: no public shipping-quote endpoint yet (see MISSING_API.md).
+        setShippingChoices([]);
+        setShippingError(
+          "Estimasi ongkir untuk tamu belum tersedia. Login dulu, atau biaya kirim akan dihitung manual oleh admin."
+        );
+      }
+    } catch (e) {
+      setShippingChoices([]);
+      setShippingError(e instanceof Error ? e.message : "Gagal memuat ongkir");
+    } finally {
+      setIsLoadingShipping(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (step === 1) {
+      setStep(2);
+      void loadShippingOptions();
+      return;
+    }
+    if (step === 2) {
+      setStep(3);
+      return;
+    }
+
+    // step 3
+    const cityObj = cities.find((c) => c.id === selectedCity) ?? null;
+    if (!cityObj || !districtId || !shippingOpt) return;
+
+    setIsPlacingOrder(true);
+    try {
+      const order = await ordersApi.checkout({
+        shipping_address: {
+          name,
+          email,
+          phone: normalizePhone(phone),
+          street: address,
+          city: cityObj.name,
+          province: cityObj.province,
+          postal_code: postalCode || "00000",
+          country: "ID",
+          district_id: districtId,
+        },
+        courier_code: shippingOpt.courier_code,
+        service_code: shippingOpt.service_code,
+      });
+
       saveLastOrder({
-        id: orderId,
+        id: order.id,
         phone: normalizePhone(phone),
         createdAt: new Date().toISOString(),
-        total,
+        total: order.total_idr ?? total,
         status: "paid",
       });
-      cart.clear();
-      router.push(`/store/order/${orderId}`);
+      await cart.clear();
+
+      if (isAuthenticated) {
+        // Create payment + redirect to Xendit
+        try {
+          const payment = await paymentsApi.createPayment({
+            order_id: order.id,
+            payment_method: "BANK_TRANSFER",
+          });
+          if (payment.payment_url) {
+            window.location.href = payment.payment_url;
+            return;
+          }
+        } catch (e) {
+          console.error("create payment failed", e);
+        }
+      }
+      // Guest (or payment failed): land on order page.
+      router.push(`/store/order/${order.id}`);
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -108,6 +195,7 @@ export function DesktopCheckout() {
   }
 
   const cityName = (id: string) => cities.find((c) => c.id === id)?.name ?? "";
+  const provinceName = (id: string) => cities.find((c) => c.id === id)?.province ?? "";
 
   return (
     <div className="bg-background min-h-screen">
@@ -254,11 +342,29 @@ export function DesktopCheckout() {
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="Kode pos" helper="Opsional">
+                  <Field label="Kode pos" helper="Opsional (akan diganti dari location search)">
                     <Input
                       className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
                       placeholder="40123"
                       inputMode="numeric"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                    />
+                  </Field>
+                  <Field
+                    label="District ID"
+                    required
+                    helper="Backend checkout butuh district_id. Sementara isi manual (akan diganti location search)."
+                  >
+                    <Input
+                      className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
+                      placeholder="contoh: 1234"
+                      inputMode="numeric"
+                      value={districtId ? String(districtId) : ""}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        setDistrictId(Number.isFinite(n) && n > 0 ? n : null);
+                      }}
                     />
                   </Field>
                   <Field label="Alamat lengkap" required className="col-span-2">
@@ -286,37 +392,50 @@ export function DesktopCheckout() {
                 </header>
 
                 <div className="p-6">
-                  <RadioGroup value={selectedShipping} onValueChange={setSelectedShipping}>
-                    <div className="space-y-3">
-                      {shippingOptions.map((opt) => {
-                        const isActive = selectedShipping === opt.id;
-                        return (
-                          <label
-                            key={opt.id}
-                            className={cn(
-                              "flex items-center justify-between gap-4 p-4 border rounded-2xl cursor-pointer transition-all",
-                              isActive
-                                ? "border-ink bg-surface-soft shadow-sm"
-                                : "border-hairline hover:border-ink/40"
-                            )}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <RadioGroupItem value={opt.id} />
-                              <div className="min-w-0">
-                                <p className="font-semibold text-ink">{opt.name}</p>
-                                <p className="text-xs text-muted">
-                                  Estimasi tiba {opt.estimate}
-                                </p>
-                              </div>
-                            </div>
-                            <span className="font-semibold tabular-nums">
-                              {formatPrice(opt.price)}
-                            </span>
-                          </label>
-                        );
-                      })}
+                  {isLoadingShipping ? (
+                    <div className="text-sm text-muted">Memuat opsi pengiriman...</div>
+                  ) : shippingError ? (
+                    <div className="rounded-xl border border-hairline bg-surface-soft p-4 text-sm text-ink/80">
+                      {shippingError}
                     </div>
-                  </RadioGroup>
+                  ) : shippingChoices.length === 0 ? (
+                    <div className="text-sm text-muted">Tidak ada opsi pengiriman tersedia.</div>
+                  ) : (
+                    <RadioGroup value={selectedShipping} onValueChange={setSelectedShipping}>
+                      <div className="space-y-3">
+                        {shippingChoices.map((opt) => {
+                          const key = shippingKey(opt);
+                          const isActive = selectedShipping === key;
+                          return (
+                            <label
+                              key={key}
+                              className={cn(
+                                "flex items-center justify-between gap-4 p-4 border rounded-2xl cursor-pointer transition-all",
+                                isActive
+                                  ? "border-ink bg-surface-soft shadow-sm"
+                                  : "border-hairline hover:border-ink/40"
+                              )}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <RadioGroupItem value={key} />
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-ink">
+                                    {opt.courier_name} · {opt.service_code}
+                                  </p>
+                                  <p className="text-xs text-muted truncate">
+                                    {opt.service_name} · Estimasi {opt.etd}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="font-semibold tabular-nums">
+                                {formatPrice(opt.cost_idr)}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </RadioGroup>
+                  )}
                 </div>
               </section>
             )}
@@ -370,7 +489,7 @@ export function DesktopCheckout() {
                     </p>
                     <p className="text-xs text-muted mt-1">
                       {address || "—"}
-                      {selectedCity && `, ${cityName(selectedCity)}`}
+                      {selectedCity && `, ${cityName(selectedCity)}, ${provinceName(selectedCity)}`}
                     </p>
                   </div>
                 </div>
@@ -389,14 +508,14 @@ export function DesktopCheckout() {
                 </Button>
               )}
               <Button
-                onClick={handleNext}
-                disabled={!canProceed()}
+                onClick={() => void handleNext()}
+                disabled={!canProceed() || isPlacingOrder || cart.isSyncing}
                 className="flex-1 rounded-full h-12 text-sm font-semibold"
               >
                 {step === 3 ? (
                   <>
                     <Lock className="w-4 h-4 mr-2 text-white stroke-white" />
-                    Bayar {formatPrice(total)}
+                    {isPlacingOrder ? "Membuat pesanan..." : `Bayar ${formatPrice(total)}`}
                   </>
                 ) : (
                   <>
@@ -426,33 +545,30 @@ export function DesktopCheckout() {
                 <ul className="divide-y divide-hairline max-h-72 overflow-y-auto">
                   {items.map((item) => (
                     <li
-                      key={`${item.line.productId}::${item.line.color ?? ""}::${item.line.size ?? ""}`}
+                      key={item.cart_item_id}
                       className="p-4 flex gap-3"
                     >
                       <div className="relative h-14 w-14 bg-surface-soft rounded-xl overflow-hidden flex-shrink-0">
                         <SafeImage
-                          src={
-                            item.product?.images?.[0] ||
-                            `https://picsum.photos/seed/${item.product?.slug ?? item.line.productId}/140/140`
-                          }
-                          alt={item.product?.name ?? "Produk"}
+                          src={item.image_url ?? ""}
+                          alt={item.product_name ?? "Produk"}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
                         <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center">
-                          {item.line.quantity}
+                          {item.quantity}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-ink line-clamp-1">
-                          {item.product?.name ?? "Produk"}
+                          {item.product_name ?? "Produk"}
                         </p>
                         <p className="text-xs text-muted line-clamp-1">
-                          {[item.line.color, item.line.size].filter(Boolean).join(" • ") || "—"}
+                          {item.variant_name || "—"}
                         </p>
                       </div>
                       <span className="text-sm font-semibold tabular-nums text-ink">
-                        {formatPrice((item.product?.price ?? 0) * item.line.quantity)}
+                        {formatPrice(item.subtotal_idr)}
                       </span>
                     </li>
                   ))}

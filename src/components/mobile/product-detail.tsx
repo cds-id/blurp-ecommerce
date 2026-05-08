@@ -21,9 +21,10 @@ import { useCart } from "@/src/components/shared/cart-provider";
 
 interface MobileProductDetailProps {
   product: Product;
+  defaultVariantId?: string | null;
 }
 
-export function MobileProductDetail({ product }: MobileProductDetailProps) {
+export function MobileProductDetail({ product, defaultVariantId }: MobileProductDetailProps) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "");
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -32,7 +33,7 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
   const [showDescription, setShowDescription] = useState(false);
   const [showSpecs, setShowSpecs] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
-  const { addItem } = useCart();
+  const { addVariant } = useCart();
 
   const discount = product.originalPrice
     ? calculateDiscount(product.originalPrice, product.price)
@@ -300,13 +301,10 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
           size="lg"
           className="flex-1 rounded-full font-semibold border-hairline h-12"
           onClick={() => {
-            addItem({
-              productId: product.id,
-              quantity,
-              color: selectedColor || undefined,
-              size: selectedSize || undefined,
-            });
+            if (!defaultVariantId) return;
+            void addVariant({ variantId: defaultVariantId, quantity });
           }}
+          disabled={!defaultVariantId}
         >
           + Keranjang
         </Button>
