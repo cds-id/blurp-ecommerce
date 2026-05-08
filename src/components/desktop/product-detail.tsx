@@ -15,10 +15,10 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { QuantityPicker } from "@/src/components/shared";
+import { SafeImage } from "@/src/components/shared/safe-image";
 import { Product } from "@/src/data/products";
 import { shippingOptions, cities } from "@/src/data/shipping";
 import { formatPrice, calculateDiscount, cn } from "@/src/lib/utils";
-import { productImages } from "@/src/data/mock-images";
 import { useCart } from "@/src/components/shared/cart-provider";
 
 interface DesktopProductDetailProps {
@@ -40,14 +40,10 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
 
   const isLowStock = product.stock <= 3;
   
-  // Get product image
-  const mainImage = productImages[product.slug] || productImages.product1;
-  const imageVariants = [
-    mainImage,
-    productImages.product2,
-    productImages.product3,
-    productImages.product4,
-  ];
+  const imageVariants =
+    product.images && product.images.length > 0
+      ? product.images
+      : [];
 
   return (
     <div className="bg-canvas min-h-screen">
@@ -71,10 +67,12 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
           {/* Image Gallery - Airbnb Style */}
           <div className="space-y-4">
             <div className="aspect-square rounded-xl overflow-hidden bg-surface-soft group">
-              <img 
-                src={imageVariants[activeImage]} 
+              <SafeImage
+                src={imageVariants[activeImage]}
                 alt={product.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                priority
               />
             </div>
             <div className="grid grid-cols-4 gap-3">
@@ -89,10 +87,11 @@ export function DesktopProductDetail({ product }: DesktopProductDetailProps) {
                   )}
                   onClick={() => setActiveImage(i)}
                 >
-                  <img 
-                    src={img} 
+                  <SafeImage
+                    src={img}
                     alt={`${product.name} - ${i + 1}`}
                     className="w-full h-full object-cover"
+                    sizes="(min-width: 1024px) 10vw, 20vw"
                   />
                 </button>
               ))}

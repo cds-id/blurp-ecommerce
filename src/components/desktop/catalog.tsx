@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, Grid3X3, List } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Checkbox } from "@/src/components/ui/checkbox";
@@ -14,9 +15,9 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { ProductCard, ProductCardSkeleton } from "@/src/components/shared";
-import { products } from "@/src/data/products";
-import { categories } from "@/src/data/categories";
-import { useSimulatedLoading } from "@/src/hooks/use-simulated-loading";
+import type { Category } from "@/src/data/categories";
+import type { Product } from "@/src/data/products";
+import type { ApiMeta } from "@/src/lib/api/types";
 
 const sortOptions = [
   { value: "popular", label: "Terpopuler" },
@@ -28,39 +29,44 @@ const sortOptions = [
 const sizes = ["S", "M", "L", "XL", "XXL"];
 
 interface DesktopCatalogProps {
-  category?: string;
+  categories: Category[];
+  products: Product[];
+  selectedCategory?: string;
+  searchQuery?: string;
+  meta?: ApiMeta | null;
 }
 
-export function DesktopCatalog({ category }: DesktopCatalogProps) {
+function setQueryParam(
+  params: URLSearchParams,
+  key: string,
+  value: string | undefined,
+): URLSearchParams {
+  const next = new URLSearchParams(params);
+  if (!value) next.delete(key);
+  else next.set(key, value);
+  return next;
+}
+
+export function DesktopCatalog({
+  categories,
+  products,
+  selectedCategory,
+  meta,
+}: DesktopCatalogProps) {
   const [sortBy, setSortBy] = useState("popular");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    category ? [category] : []
-  );
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const isLoading = useSimulatedLoading(700);
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+  const category = selectedCategory;
 
-  const filteredProducts = products.filter((p) => {
-    if (selectedCategories.length > 0 && !selectedCategories.includes(p.categorySlug)) {
-      return false;
-    }
-    if (selectedSizes.length > 0 && !p.sizes.some((s) => selectedSizes.includes(s))) {
-      return false;
-    }
-    return true;
-  });
+  const totalLabel = useMemo(() => {
+    const total = meta?.total;
+    if (typeof total === "number") return `${total} produk ditemukan`;
+    return `${products.length} produk ditemukan`;
+  }, [meta?.total, products.length]);
 
-  const toggleCategory = (slug: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(slug) ? prev.filter((c) => c !== slug) : [...prev, slug]
-    );
-  };
-
-  const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
-  };
+  const filtersDisabled = true;
 
   return (
     <div className="bg-background min-h-screen">
@@ -88,13 +94,14 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <Checkbox
-                      checked={selectedCategories.includes(cat.slug)}
-                      onCheckedChange={() => toggleCategory(cat.slug)}
+                      checked={category === cat.slug}
+                      onCheckedChange={() => {
+                        const nextCategory = category === cat.slug ? undefined : cat.slug;
+                        const next = setQueryParam(new URLSearchParams(sp), "category", nextCategory);
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
                     />
                     <span className="text-sm">{cat.name}</span>
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      ({cat.productCount})
-                    </span>
                   </label>
                 ))}
               </div>
@@ -102,26 +109,29 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
 
             <Separator />
 
-            <div>
+            <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
               <h3 className="font-semibold mb-3">Ukuran</h3>
               <div className="flex flex-wrap gap-2">
                 {sizes.map((size) => (
                   <Button
                     key={size}
-                    variant={selectedSizes.includes(size) ? "default" : "outline"}
+                    variant={"outline"}
                     size="sm"
                     className="h-8 w-10"
-                    onClick={() => toggleSize(size)}
+                    onClick={() => {}}
                   >
                     {size}
                   </Button>
                 ))}
               </div>
+              {filtersDisabled && (
+                <p className="text-xs text-muted-foreground mt-2">Filter ukuran menunggu dukungan backend.</p>
+              )}
             </div>
 
             <Separator />
 
-            <div>
+            <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
               <h3 className="font-semibold mb-3">Harga</h3>
               <div className="space-y-2 text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -141,14 +151,23 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
                   <span>Di atas Rp 500rb</span>
                 </label>
               </div>
+              {filtersDisabled && (
+                <p className="text-xs text-muted-foreground mt-2">Filter harga menunggu dukungan backend.</p>
+              )}
             </div>
 
             <Separator />
 
-            <Button variant="outline" className="w-full" onClick={() => {
-              setSelectedCategories([]);
-              setSelectedSizes([]);
-            }}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const next = new URLSearchParams(sp);
+                next.delete("category");
+                next.delete("page");
+                router.push(`${pathname}?${next.toString()}`);
+              }}
+            >
               Reset Filter
             </Button>
           </aside>
@@ -158,10 +177,10 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
             {/* Toolbar */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-muted-foreground">
-                {filteredProducts.length} produk ditemukan
+                {totalLabel}
               </p>
               <div className="flex items-center gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={sortBy} onValueChange={setSortBy} disabled>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -196,7 +215,7 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
             </div>
 
             {/* Products */}
-            {isLoading ? (
+            {false ? (
               <div
                 className={
                   viewMode === "grid"
@@ -209,7 +228,7 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
-            ) : filteredProducts.length > 0 ? (
+            ) : products.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
@@ -217,7 +236,7 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
                     : "grid grid-cols-1 gap-4"
                 }
               >
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -229,8 +248,10 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
                 <Button
                   variant="link"
                   onClick={() => {
-                    setSelectedCategories([]);
-                    setSelectedSizes([]);
+                    const next = new URLSearchParams(sp);
+                    next.delete("category");
+                    next.delete("page");
+                    router.push(`${pathname}?${next.toString()}`);
                   }}
                 >
                   Reset filter
@@ -239,25 +260,39 @@ export function DesktopCatalog({ category }: DesktopCatalogProps) {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
-              <div className="flex justify-center gap-2 mt-8">
-                <Button variant="outline" size="sm" disabled>
-                  ‹
-                </Button>
-                <Button variant="default" size="sm">
-                  1
-                </Button>
-                <Button variant="outline" size="sm">
-                  2
-                </Button>
-                <Button variant="outline" size="sm">
-                  3
-                </Button>
-                <Button variant="outline" size="sm">
-                  ›
-                </Button>
-              </div>
-            )}
+            {typeof meta?.page === "number" &&
+              typeof meta?.total_pages === "number" &&
+              meta.total_pages > 1 && (
+                <div className="flex justify-center gap-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={meta.page <= 1}
+                    onClick={() => {
+                      const nextPage = Math.max(1, (meta.page ?? 1) - 1);
+                      const next = setQueryParam(new URLSearchParams(sp), "page", String(nextPage));
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  >
+                    ‹
+                  </Button>
+                  <Button variant="default" size="sm" disabled>
+                    {meta.page}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={meta.page >= meta.total_pages}
+                    onClick={() => {
+                      const nextPage = Math.min(meta.total_pages ?? 1, (meta.page ?? 1) + 1);
+                      const next = setQueryParam(new URLSearchParams(sp), "page", String(nextPage));
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  >
+                    ›
+                  </Button>
+                </div>
+              )}
           </main>
         </div>
       </div>

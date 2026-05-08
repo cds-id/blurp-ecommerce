@@ -1,28 +1,32 @@
-"use client";
-
-import { use } from "react";
 import { notFound } from "next/navigation";
-import { useIsDesktop } from "@/src/hooks";
 import { DesktopProductDetail } from "@/src/components/desktop";
 import { MobileProductDetail } from "@/src/components/mobile";
-import { getProductBySlug, products } from "@/src/data/products";
+import { getCatalogProductDetail, listCatalogCategories } from "@/src/lib/catalog/server";
+import { toUiProductDetail } from "@/src/lib/catalog/adapters";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  const { id } = use(params);
-  const product = getProductBySlug(id) || products.find((p) => p.id === id);
-  const isDesktop = useIsDesktop();
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+  const cats = await listCatalogCategories().catch(() => null);
+  if (!cats) notFound();
 
-  if (!product) {
-    notFound();
-  }
+  const categoryById = new Map(cats.map((c) => [c.id, { name: c.name, slug: c.slug }] as const));
+  const detail = await getCatalogProductDetail(id).catch(() => null);
+  if (!detail) notFound();
 
-  return isDesktop ? (
-    <DesktopProductDetail product={product} />
-  ) : (
-    <MobileProductDetail product={product} />
+  const product = toUiProductDetail(detail, categoryById);
+
+  return (
+    <>
+      <div className="hidden md:block">
+        <DesktopProductDetail product={product} />
+      </div>
+      <div className="md:hidden">
+        <MobileProductDetail product={product} />
+      </div>
+    </>
   );
 }

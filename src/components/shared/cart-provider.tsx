@@ -149,8 +149,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Hydrate from localStorage on client only
   useEffect(() => {
     const stored = readStoredCart();
-    const filtered = stored.filter((l) => productById.has(l.productId));
-    dispatch({ type: "hydrate", lines: filtered });
+    dispatch({ type: "hydrate", lines: stored });
   }, []);
 
   // Persist after hydration (avoid clobbering stored cart with empty SSR state)
@@ -165,7 +164,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore quota/security errors
     }
-  }, [state.lines]);
+  }, [state.isHydrated, state.lines]);
 
   const derived = useMemo(() => {
     const count = state.lines.reduce((sum, l) => sum + l.quantity, 0);
@@ -177,7 +176,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [state.lines]);
 
   const addItem = useCallback((input: AddItemInput) => {
-    if (!productById.has(input.productId)) return;
     dispatch({ type: "addItem", input });
   }, []);
 
