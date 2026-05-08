@@ -4,12 +4,18 @@ import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { ProductGrid } from "@/src/components/shared";
 import { SafeImage } from "@/src/components/shared/safe-image";
-import { getFeaturedProducts, getNewProducts } from "@/src/data/products";
 import { mockImages } from "@/src/data/mock-images";
+import type { Product } from "@/src/data/products";
+import type { Category } from "@/src/data/categories";
 
-export function DesktopHome() {
-  const featuredProducts = getFeaturedProducts(4);
-  const newDrops = getNewProducts().slice(0, 4);
+export function DesktopHome({
+  featuredProducts,
+  newDrops,
+}: {
+  featuredProducts: Product[];
+  newDrops: Product[];
+  categories?: Category[];
+}) {
 
   const routineCards = [
     {
@@ -83,10 +89,12 @@ export function DesktopHome() {
       <section className="relative w-full overflow-hidden min-h-[600px] lg:min-h-[700px]">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
-          <img 
+          <SafeImage
             src={mockImages.hero}
             alt="Hero Background"
             className="w-full h-full object-cover"
+            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -167,11 +175,11 @@ export function DesktopHome() {
               <div className="relative">
                 <div className="relative rounded-2xl overflow-hidden bg-white/95 shadow-2xl ring-1 ring-white/30">
                   <div className="aspect-[4/5]">
-                    <img
+                    <SafeImage
                       src={mockImages.product1}
                       alt="Featured Product"
                       className="h-full w-full object-cover"
-                      loading="lazy"
+                      sizes="(min-width: 1024px) 40vw, 90vw"
                     />
                   </div>
                   <div className="p-5">
@@ -189,11 +197,11 @@ export function DesktopHome() {
                 </div>
 
                 <div className="absolute -bottom-8 -left-10 w-52 rounded-xl overflow-hidden shadow-xl bg-white">
-                  <img
+                  <SafeImage
                     src={mockImages.product2}
                     alt="Featured"
                     className="w-full h-56 object-cover"
-                    loading="lazy"
+                    sizes="(min-width: 1024px) 200px, 200px"
                   />
                 </div>
 
@@ -281,6 +289,7 @@ export function DesktopHome() {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
             itemClassName="animate-fade-in stagger-1"
             skeletonCount={4}
+            simulateMs={0}
           />
         </div>
       </section>
@@ -337,6 +346,7 @@ export function DesktopHome() {
               className="lg:col-span-7 grid grid-cols-2 gap-6"
               itemClassName="animate-fade-in stagger-1"
               skeletonCount={4}
+              simulateMs={0}
             />
           </div>
         </div>

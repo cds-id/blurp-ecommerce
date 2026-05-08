@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Checkbox } from "@/src/components/ui/checkbox";
@@ -22,9 +23,9 @@ import {
 } from "@/src/components/ui/select";
 import { Separator } from "@/src/components/ui/separator";
 import { ProductCard, ProductCardSkeleton } from "@/src/components/shared";
-import { products } from "@/src/data/products";
-import { categories } from "@/src/data/categories";
-import { useSimulatedLoading } from "@/src/hooks/use-simulated-loading";
+import type { Category } from "@/src/data/categories";
+import type { Product } from "@/src/data/products";
+import type { ApiMeta } from "@/src/lib/api/types";
 
 const sortOptions = [
   { value: "popular", label: "Terpopuler" },
@@ -36,40 +37,43 @@ const sortOptions = [
 const sizes = ["S", "M", "L", "XL", "XXL"];
 
 interface MobileCatalogProps {
-  category?: string;
+  categories: Category[];
+  products: Product[];
+  selectedCategory?: string;
+  searchQuery?: string;
+  meta?: ApiMeta | null;
 }
 
-export function MobileCatalog({ category }: MobileCatalogProps) {
+function setQueryParam(
+  params: URLSearchParams,
+  key: string,
+  value: string | undefined,
+): URLSearchParams {
+  const next = new URLSearchParams(params);
+  if (!value) next.delete(key);
+  else next.set(key, value);
+  return next;
+}
+
+export function MobileCatalog({
+  categories,
+  products,
+  selectedCategory,
+  meta,
+}: MobileCatalogProps) {
   const [sortBy, setSortBy] = useState("popular");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    category ? [category] : []
-  );
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const isLoading = useSimulatedLoading(700);
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+  const category = selectedCategory;
 
-  const filteredProducts = products.filter((p) => {
-    if (selectedCategories.length > 0 && !selectedCategories.includes(p.categorySlug)) {
-      return false;
-    }
-    if (selectedSizes.length > 0 && !p.sizes.some((s) => selectedSizes.includes(s))) {
-      return false;
-    }
-    return true;
-  });
-
-  const toggleCategory = (slug: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(slug) ? prev.filter((c) => c !== slug) : [...prev, slug]
-    );
-  };
-
-  const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
-  };
-
-  const activeFilterCount = selectedCategories.length + selectedSizes.length;
+  const filtersDisabled = true;
+  const activeFilterCount = category ? 1 : 0;
+  const totalLabel = useMemo(() => {
+    const total = meta?.total;
+    if (typeof total === "number") return `${total} produk`;
+    return `${products.length} produk`;
+  }, [meta?.total, products.length]);
 
   return (
     <div className="bg-background">
@@ -102,8 +106,13 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <Checkbox
-                        checked={selectedCategories.includes(cat.slug)}
-                        onCheckedChange={() => toggleCategory(cat.slug)}
+                        checked={category === cat.slug}
+                        onCheckedChange={() => {
+                          const nextCategory = category === cat.slug ? undefined : cat.slug;
+                          const next = setQueryParam(new URLSearchParams(sp), "category", nextCategory);
+                          next.delete("page");
+                          router.push(`${pathname}?${next.toString()}`);
+                        }}
                       />
                       <span className="text-sm">{cat.name}</span>
                     </label>
@@ -113,21 +122,24 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
 
               <Separator />
 
-              <div>
+              <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
                 <h4 className="font-medium mb-3">Ukuran</h4>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => (
                     <Button
                       key={size}
-                      variant={selectedSizes.includes(size) ? "default" : "outline"}
+                      variant={"outline"}
                       size="sm"
                       className="h-8 w-10"
-                      onClick={() => toggleSize(size)}
+                      onClick={() => {}}
                     >
                       {size}
                     </Button>
                   ))}
                 </div>
+                {filtersDisabled && (
+                  <p className="text-xs text-muted-foreground mt-2">Filter ukuran menunggu dukungan backend.</p>
+                )}
               </div>
             </div>
 
@@ -136,8 +148,10 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
                 variant="outline"
                 className="flex-1"
                 onClick={() => {
-                  setSelectedCategories([]);
-                  setSelectedSizes([]);
+                  const next = new URLSearchParams(sp);
+                  next.delete("category");
+                  next.delete("page");
+                  router.push(`${pathname}?${next.toString()}`);
                 }}
               >
                 Reset
@@ -149,7 +163,7 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
           </SheetContent>
         </Sheet>
 
-        <Select value={sortBy} onValueChange={setSortBy}>
+        <Select value={sortBy} onValueChange={setSortBy} disabled>
           <SelectTrigger className="w-[130px] h-9">
             <SelectValue />
           </SelectTrigger>
@@ -166,52 +180,42 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
       {/* Active Filters */}
       {activeFilterCount > 0 && (
         <div className="px-4 py-2 flex flex-wrap gap-2 border-b border-hairline">
-          {selectedCategories.map((slug) => {
-            const cat = categories.find((c) => c.slug === slug);
-            return (
-              <Button
-                key={slug}
-                variant="secondary"
-                size="sm"
-                className="h-7 gap-1 text-xs"
-                onClick={() => toggleCategory(slug)}
-              >
-                {cat?.name}
-                <X className="h-3 w-3" />
-              </Button>
-            );
-          })}
-          {selectedSizes.map((size) => (
+          {category ? (
             <Button
-              key={size}
+              key={category}
               variant="secondary"
               size="sm"
               className="h-7 gap-1 text-xs"
-              onClick={() => toggleSize(size)}
+              onClick={() => {
+                const next = new URLSearchParams(sp);
+                next.delete("category");
+                next.delete("page");
+                router.push(`${pathname}?${next.toString()}`);
+              }}
             >
-              {size}
+              {categories.find((c) => c.slug === category)?.name ?? category}
               <X className="h-3 w-3" />
             </Button>
-          ))}
+          ) : null}
         </div>
       )}
 
       {/* Results Count */}
       <div className="px-4 py-2 text-xs text-muted-foreground">
-        {filteredProducts.length} produk
+        {totalLabel}
       </div>
 
       {/* Product Grid */}
       <div className="px-4 pb-4">
-        {isLoading ? (
+        {false ? (
           <div className="grid grid-cols-2 gap-3" aria-busy="true">
             {Array.from({ length: 6 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
-        ) : filteredProducts.length > 0 ? (
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -224,8 +228,10 @@ export function MobileCatalog({ category }: MobileCatalogProps) {
               variant="link"
               size="sm"
               onClick={() => {
-                setSelectedCategories([]);
-                setSelectedSizes([]);
+                const next = new URLSearchParams(sp);
+                next.delete("category");
+                next.delete("page");
+                router.push(`${pathname}?${next.toString()}`);
               }}
             >
               Reset filter

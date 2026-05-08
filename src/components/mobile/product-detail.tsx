@@ -13,10 +13,10 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { QuantityPicker } from "@/src/components/shared";
+import { SafeImage } from "@/src/components/shared/safe-image";
 import { Product } from "@/src/data/products";
 import { shippingOptions, cities } from "@/src/data/shipping";
 import { formatPrice, calculateDiscount, cn } from "@/src/lib/utils";
-import { productImages } from "@/src/data/mock-images";
 import { useCart } from "@/src/components/shared/cart-provider";
 
 interface MobileProductDetailProps {
@@ -40,23 +40,21 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
 
   const isLowStock = product.stock <= 3;
   
-  // Get product images
-  const mainImage = productImages[product.slug] || productImages.product1;
-  const imageVariants = [
-    mainImage,
-    productImages.product2,
-    productImages.product3,
-    productImages.product4,
-  ];
+  const imageVariants =
+    product.images && product.images.length > 0
+      ? product.images
+      : [];
 
   return (
     <div className="bg-canvas pb-24">
       {/* Image Carousel */}
       <div className="relative aspect-square overflow-hidden">
-        <img 
-          src={imageVariants[activeImage]} 
+        <SafeImage
+          src={imageVariants[activeImage]}
           alt={product.name}
           className="w-full h-full object-cover"
+          sizes="100vw"
+          priority
         />
         
         {/* Badges */}
@@ -90,10 +88,11 @@ export function MobileProductDetail({ product }: MobileProductDetailProps) {
             )}
             onClick={() => setActiveImage(i)}
           >
-            <img 
-              src={img} 
+            <SafeImage
+              src={img}
               alt={`${product.name} - ${i + 1}`}
               className="w-full h-full object-cover"
+              sizes="64px"
             />
           </button>
         ))}

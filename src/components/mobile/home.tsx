@@ -4,13 +4,19 @@ import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { ProductGrid } from "@/src/components/shared";
 import { SafeImage } from "@/src/components/shared/safe-image";
-import { categories } from "@/src/data/categories";
-import { getFeaturedProducts, getNewProducts } from "@/src/data/products";
 import { mockImages } from "@/src/data/mock-images";
+import type { Category } from "@/src/data/categories";
+import type { Product } from "@/src/data/products";
 
-export function MobileHome() {
-  const featuredProducts = getFeaturedProducts(4);
-  const newDrops = getNewProducts().slice(0, 4);
+export function MobileHome({
+  categories,
+  featuredProducts,
+  newDrops,
+}: {
+  categories: Category[];
+  featuredProducts: Product[];
+  newDrops: Product[];
+}) {
 
   const routineCards = [
     { title: "Cleanse", subtitle: "Mulai dari kulit bersih", href: "/store/catalog?category=skincare", image: "https://picsum.photos/seed/m-routine-cleanse/900/900" },
@@ -37,10 +43,12 @@ export function MobileHome() {
       <section className="relative w-full overflow-hidden min-h-[500px]">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <img 
+          <SafeImage
             src={mockImages.hero3}
             alt="Hero"
             className="w-full h-full object-cover"
+            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
         </div>
@@ -170,11 +178,11 @@ export function MobileHome() {
               className={`text-center animate-fade-in stagger-${index + 1}`}
             >
               <div className="aspect-square rounded-xl overflow-hidden mb-2 relative group shadow-sm">
-                <img 
+                <SafeImage
                   src={category.image || `https://picsum.photos/200/200?random=${index + 10}`}
                   alt={category.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
+                  sizes="25vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -204,6 +212,7 @@ export function MobileHome() {
           className="grid grid-cols-2 gap-3"
           itemClassName="animate-fade-in stagger-1"
           skeletonCount={4}
+          simulateMs={0}
         />
       </section>
 
@@ -250,6 +259,7 @@ export function MobileHome() {
           className="grid grid-cols-2 gap-3"
           itemClassName="animate-fade-in stagger-1"
           skeletonCount={4}
+          simulateMs={0}
         />
       </section>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Heart, Star } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
@@ -22,8 +24,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     ? calculateDiscount(product.originalPrice, product.price)
     : null;
 
-  // Use product's own image or picsum fallback
-  const productImage = product.images?.[0] || `https://picsum.photos/seed/${product.slug}/600/600`;
+  const productImage = product.images?.[0] ?? "";
 
   return (
     <Card
@@ -39,11 +40,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             src={productImage}
             alt={product.name}
             className="w-full h-full object-cover product-image"
-            loading="lazy"
-            fallbackSrcs={[
-              `https://picsum.photos/seed/${product.slug}-fallback/600/600`,
-              "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=1200&h=1200&fit=crop&q=80",
-            ]}
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           />
           
           {/* Wishlist Button - Airbnb Style */}
@@ -111,12 +108,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </h3>
         </Link>
         
-        {/* Rating - Airbnb Style */}
-        <div className="flex items-center gap-1.5 mt-2">
-          <Star className="w-3.5 h-3.5 text-star-rating fill-star-rating" />
-          <span className="text-sm font-medium text-ink">{product.rating}</span>
-          <span className="text-sm text-muted">({product.reviewCount})</span>
-        </div>
+        {/* Rating (backend doesn't provide yet) */}
+        {product.rating > 0 && product.reviewCount > 0 ? (
+          <div className="flex items-center gap-1.5 mt-2">
+            <Star className="w-3.5 h-3.5 text-star-rating fill-star-rating" />
+            <span className="text-sm font-medium text-ink">{product.rating}</span>
+            <span className="text-sm text-muted">({product.reviewCount})</span>
+          </div>
+        ) : null}
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mt-2">
