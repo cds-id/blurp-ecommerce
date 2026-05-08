@@ -20,21 +20,21 @@ export interface PaymentResponse {
 
 // ─── Endpoints ───────────────────────────────────────────────
 
-/** POST /api/payments — auth required (Bearer JWT). */
+/** POST /api/payments — Bearer JWT (user) or X-Guest-ID (guest). */
 export function createPayment(req: CreatePaymentRequest): Promise<PaymentResponse> {
   return apiFetch<PaymentResponse>("/api/payments", {
     method: "POST",
     json: req,
     auth: true,
-    guest: false,
+    guest: true,
   });
 }
 
-/** GET /api/payments/{order_id} — auth required (Bearer JWT). */
+/** GET /api/payments/{order_id} — Bearer JWT (user) or X-Guest-ID (guest). */
 export function getPaymentByOrder(orderId: string): Promise<PaymentResponse> {
   return apiFetch<PaymentResponse>(`/api/payments/${encodeURIComponent(orderId)}`, {
     method: "GET",
     auth: true,
-    guest: false,
+    guest: true,
   });
 }

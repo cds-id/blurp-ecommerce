@@ -12,6 +12,7 @@ export interface CartLineItem {
   price_idr: number;
   quantity: number;
   subtotal_idr: number;
+  weight_grams: number;
   image_url: string | null;
 }
 
@@ -22,6 +23,7 @@ export interface CartSummary {
   line_items: CartLineItem[];
   total_items: number;
   subtotal_idr: number;
+  total_weight_grams: number;
   coupon_discount_idr: number | null;
 }
 

@@ -31,7 +31,7 @@ import { saveLastOrder } from "@/src/data/mock-orders";
 import { SafeImage } from "@/src/components/shared/safe-image";
 import { SummaryRowSkeleton, Skeleton } from "@/src/components/shared/skeleton";
 import { useSimulatedLoading } from "@/src/hooks/use-simulated-loading";
-import { ordersApi, paymentsApi } from "@/src/lib/api";
+import { ordersApi, paymentsApi, shippingApi } from "@/src/lib/api";
 import type { ShippingOption } from "@/src/lib/api/orders";
 import { useAuth } from "@/src/hooks/use-auth";
 
@@ -105,10 +105,34 @@ export function MobileCheckout() {
         });
         setShippingChoices(quote.shipping_options);
       } else {
-        setShippingChoices([]);
-        setShippingError(
-          "Estimasi ongkir untuk tamu belum tersedia. Login dulu, atau biaya kirim akan dihitung manual."
-        );
+        const cfg = await shippingApi.getConfig();
+        const weight = cart.summary?.total_weight_grams ?? 0;
+        if (!cfg?.origin_district_id || weight <= 0) {
+          setShippingChoices([]);
+          setShippingError("Guest shipping gagal: origin atau total_weight_grams kosong.");
+          return;
+        }
+        const res = await shippingApi.shippingCost({
+          origin_district_id: cfg.origin_district_id,
+          destination_district_id: districtId,
+          weight_grams: weight,
+          couriers: ["jne", "jnt", "sicepat"],
+        });
+
+        const opts: ShippingOption[] = [];
+        for (const c of res.costs ?? []) {
+          for (const s of c.services ?? []) {
+            opts.push({
+              courier_code: c.courier_code,
+              courier_name: c.courier_name,
+              service_code: s.service_code,
+              service_name: s.service_name,
+              cost_idr: s.cost_idr,
+              etd: s.etd,
+            });
+          }
+        }
+        setShippingChoices(opts);
       }
     } catch (e) {
       setShippingChoices([]);
@@ -160,6 +184,11 @@ export function MobileCheckout() {
         status: "paid",
       });
       await cart.clear();
+
+      if (order.payment_url) {
+        window.location.href = order.payment_url;
+        return;
+      }
 
       if (isAuthenticated) {
         try {
