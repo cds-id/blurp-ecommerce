@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ScrollToTopOnNavigate } from "@/src/components/shared/scroll-to-top";
 import { CartProvider } from "@/src/components/shared/cart-provider";
+import { AuthProvider } from "@/src/hooks/use-auth";
 
 export const metadata: Metadata = {
   title: "SoraStore - Belanja cepat, tanpa daftar",
@@ -21,10 +22,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className="min-h-screen antialiased">
-        <CartProvider>
-          <ScrollToTopOnNavigate />
-          {children}
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ScrollToTopOnNavigate />
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

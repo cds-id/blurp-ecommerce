@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Search, Heart, User, ShoppingCart, Menu, X } from "lucide-react";
+import { Search, Heart, User, ShoppingCart, Menu, X, LogIn, LogOut, Package } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { cn, formatPrice } from "@/src/lib/utils";
 import { SafeImage } from "@/src/components/shared/safe-image";
@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/src/components/ui/dialog";
 import { CartBadge } from "@/src/components/shared/cart-badge";
 import { products } from "@/src/data/products";
 import { storefrontMegaCategories, type StorefrontMegaCategoryId } from "@/src/data/storefront-nav";
+import { DesktopNavbarAccount } from "@/src/components/shared/navbar-account";
+import { useAuth } from "@/src/hooks/use-auth";
 
 export function DesktopNavbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -115,14 +117,7 @@ export function DesktopNavbar() {
           <CartBadge size="md" placement="corner" />
         </Button>
       </Link>
-      <Link href="/login">
-        <button className="flex items-center gap-2 pl-3 pr-4 py-2 rounded-full border border-hairline hover:border-ink hover:shadow-md transition-all ml-1">
-          <Menu className="w-4 h-4 text-muted" />
-          <div className="w-7 h-7 rounded-full bg-ink flex items-center justify-center">
-            <User className="w-3.5 h-3.5 text-white" />
-          </div>
-        </button>
-      </Link>
+      <DesktopNavbarAccount />
     </div>
   );
 
@@ -390,18 +385,67 @@ export function DesktopNavbar() {
                 Keranjang
                 <CartBadge size="md" placement="inline" className="ml-auto" />
               </Link>
-              <Link
-                href="/login"
-                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-surface-soft transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <User className="w-5 h-5 text-muted" />
-                Masuk
-              </Link>
+              <DesktopMobileMenuAccount onNavigate={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+function DesktopMobileMenuAccount({ onNavigate }: { onNavigate: () => void }) {
+  const { isAuthenticated, isLoading, profile, user, logout } = useAuth();
+  if (isLoading) return null;
+
+  if (!isAuthenticated) {
+    return (
+      <Link
+        href="/login"
+        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-surface-soft transition-colors"
+        onClick={onNavigate}
+      >
+        <LogIn className="w-5 h-5 text-muted" />
+        Masuk
+      </Link>
+    );
+  }
+
+  const email = profile?.email ?? user?.email ?? "";
+  const name = profile?.name?.trim() || profile?.username || email.split("@")[0];
+
+  return (
+    <>
+      <Link
+        href="/profile"
+        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-surface-soft transition-colors"
+        onClick={onNavigate}
+      >
+        <User className="w-5 h-5 text-muted" />
+        <span className="flex-1 min-w-0">
+          <span className="block truncate">{name}</span>
+          <span className="block text-[11px] text-muted truncate font-normal">{email}</span>
+        </span>
+      </Link>
+      <Link
+        href="/store/tracker"
+        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-surface-soft transition-colors"
+        onClick={onNavigate}
+      >
+        <Package className="w-5 h-5 text-muted" />
+        Pesanan saya
+      </Link>
+      <button
+        type="button"
+        onClick={async () => {
+          onNavigate();
+          await logout();
+        }}
+        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-surface-soft transition-colors text-red-600 w-full text-left"
+      >
+        <LogOut className="w-5 h-5" />
+        Keluar
+      </button>
     </>
   );
 }

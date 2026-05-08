@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   HelpCircle,
   LogIn,
+  LogOut,
   ChevronRight,
   ShoppingBag,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { StorefrontLayout } from "@/src/components/storefront-layout";
 import { Button } from "@/src/components/ui/button";
 import { useLastOrder } from "@/src/data/mock-orders";
 import { formatPrice } from "@/src/lib/utils";
+import { useAuth } from "@/src/hooks/use-auth";
 
 interface ProfileSection {
   href: string;
@@ -40,18 +42,28 @@ const accountSections: ProfileSection[] = [
     description: "Produk yang kamu simpan untuk dilihat lagi.",
   },
   {
-    href: "/profile",
+    href: "/profile/addresses",
     icon: MapPin,
     title: "Alamat",
     description: "Atur alamat pengiriman default kamu.",
-    badge: "Segera",
   },
   {
-    href: "/profile",
+    href: "/profile/notifications",
     icon: Bell,
     title: "Notifikasi",
     description: "Email & WhatsApp update pesanan dan promo.",
-    badge: "Segera",
+  },
+  {
+    href: "/profile/edit",
+    icon: User,
+    title: "Edit profil",
+    description: "Ubah nama, username, atau no. HP.",
+  },
+  {
+    href: "/profile/password",
+    icon: ShieldCheck,
+    title: "Ganti password",
+    description: "Ganti password akun kamu.",
   },
 ];
 
@@ -80,40 +92,88 @@ export default function ProfilePage() {
 
 function ProfileView() {
   const lastOrder = useLastOrder();
+  const { user, profile, isAuthenticated, isLoading, logout } = useAuth();
+  const displayName =
+    profile?.name?.trim() ||
+    profile?.username ||
+    profile?.email?.split("@")[0] ||
+    user?.email?.split("@")[0] ||
+    "Tamu";
 
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 max-w-3xl">
-        {/* Guest header */}
+        {/* Header (guest or user) */}
         <div className="rounded-2xl border border-hairline bg-white p-5 md:p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0">
               <User className="w-6 h-6 text-ink/70" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-base md:text-lg font-semibold text-ink">Halo, Tamu</p>
-              <p className="text-sm text-muted">
-                Masuk untuk menyimpan alamat & pantau pesanan lebih cepat.
-              </p>
+              {isLoading ? (
+                <p className="text-base md:text-lg font-semibold text-ink">Memuat...</p>
+              ) : isAuthenticated ? (
+                <>
+                  <p className="text-base md:text-lg font-semibold text-ink truncate">
+                    Halo, {displayName}
+                  </p>
+                  <p className="text-sm text-muted truncate">
+                    {profile?.email ?? user?.email}
+                    {profile?.is_admin && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                        Admin
+                      </span>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-base md:text-lg font-semibold text-ink">Halo, Tamu</p>
+                  <p className="text-sm text-muted">
+                    Masuk untuk menyimpan alamat & pantau pesanan lebih cepat.
+                  </p>
+                </>
+              )}
             </div>
           </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
-            <Button asChild className="rounded-full h-11 font-semibold flex-1">
-              <Link href="/login">
-                <LogIn className="w-4 h-4 mr-2" />
-                Masuk / Daftar
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="rounded-full h-11 border-hairline flex-1 sm:flex-none"
-            >
-              <Link href="/store/catalog">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Belanja
-              </Link>
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button
+                  onClick={() => logout()}
+                  variant="outline"
+                  className="rounded-full h-11 border-hairline flex-1 sm:flex-none"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Keluar
+                </Button>
+                <Button asChild className="rounded-full h-11 font-semibold flex-1">
+                  <Link href="/store/catalog">
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Belanja
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild className="rounded-full h-11 font-semibold flex-1">
+                  <Link href="/login">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Masuk / Daftar
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-full h-11 border-hairline flex-1 sm:flex-none"
+                >
+                  <Link href="/store/catalog">
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Belanja
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 

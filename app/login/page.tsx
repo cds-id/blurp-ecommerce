@@ -7,15 +7,29 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Mail, ArrowRight, ArrowLeft, ShoppingBag, MailCheck } from "lucide-react";
 import { SafeImage } from "@/src/components/shared/safe-image";
+import { useAuth } from "@/src/hooks/use-auth";
+import { ApiError } from "@/src/lib/api/types";
 
 function LoginContent() {
+  const { requestMagicLink } = useAuth();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await requestMagicLink(email);
       setSent(true);
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Gagal mengirim magic link. Coba lagi.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -29,6 +43,8 @@ function LoginContent() {
           sent={sent}
           setSent={setSent}
           onSubmit={handleSubmit}
+          submitting={submitting}
+          error={error}
         />
       }
       mobileContent={
@@ -38,6 +54,8 @@ function LoginContent() {
           sent={sent}
           setSent={setSent}
           onSubmit={handleSubmit}
+          submitting={submitting}
+          error={error}
         />
       }
     >
@@ -53,9 +71,11 @@ interface ViewProps {
   sent: boolean;
   setSent: (v: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
+  submitting: boolean;
+  error: string | null;
 }
 
-function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProps) {
+function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting, error }: ViewProps) {
   if (sent) {
     return (
       <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden">
@@ -245,10 +265,18 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProp
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full h-11 rounded-full text-sm font-semibold" size="lg">
-                  Kirim magic link
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                <Button
+                  type="submit"
+                  className="w-full h-11 rounded-full text-sm font-semibold"
+                  size="lg"
+                  disabled={submitting || !email}
+                >
+                  {submitting ? "Mengirim..." : "Kirim magic link"}
+                  {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
                 </Button>
+                {error && (
+                  <p className="text-xs text-red-600 text-center">{error}</p>
+                )}
               </form>
 
               <div className="relative my-5 flex items-center">
@@ -272,6 +300,21 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProp
               </Button>
 
               <div className="mt-6 pt-5 border-t border-hairline space-y-3">
+                <div className="flex items-center justify-center gap-3 text-sm">
+                  <Link
+                    href="/login/password"
+                    className="font-medium text-ink hover:underline underline-offset-2"
+                  >
+                    Masuk dengan password
+                  </Link>
+                  <span className="text-muted">·</span>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="font-medium text-ink/70 hover:text-ink underline-offset-2 hover:underline"
+                  >
+                    Lupa password?
+                  </Link>
+                </div>
                 <Link
                   href="/store/catalog"
                   className="block text-center text-sm font-medium text-ink/70 hover:text-ink transition-colors"
@@ -298,7 +341,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProp
   );
 }
 
-function MobileLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProps) {
+function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting, error }: ViewProps) {
   if (sent) {
     return (
       <div className="min-h-[calc(100vh-3.5rem)] flex flex-col px-6 pt-12 pb-8 bg-white">
@@ -378,10 +421,14 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProps
             type="submit"
             className="w-full h-12 rounded-full text-sm font-semibold mt-2"
             size="lg"
+            disabled={submitting || !email}
           >
-            Kirim magic link
-            <ArrowRight className="h-4 w-4 ml-2" />
+            {submitting ? "Mengirim..." : "Kirim magic link"}
+            {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
           </Button>
+          {error && (
+            <p className="text-xs text-red-600 text-center mt-2">{error}</p>
+          )}
         </form>
 
         <div className="relative my-5 flex items-center">
@@ -403,6 +450,22 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit }: ViewProps
           </svg>
           Lanjut dengan Google
         </Button>
+
+        <div className="flex items-center justify-center gap-3 text-sm mt-5">
+          <Link
+            href="/login/password"
+            className="font-medium text-ink hover:underline underline-offset-2"
+          >
+            Masuk dengan password
+          </Link>
+          <span className="text-muted">·</span>
+          <Link
+            href="/auth/forgot-password"
+            className="font-medium text-ink/70 hover:text-ink underline-offset-2 hover:underline"
+          >
+            Lupa password?
+          </Link>
+        </div>
 
         <p className="text-[11px] text-muted text-center mt-5 leading-relaxed">
           Dengan masuk, kamu menyetujui{" "}

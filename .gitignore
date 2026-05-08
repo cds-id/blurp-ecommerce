@@ -40,3 +40,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal specs / plans / API audits — keep local, not in repo
+MISSING_API.md
+**/MISSING_API.md
+**/*_API.md
+**/SPEC*.md
+**/PLAN*.md
+**/PLAN_*.md
+**/*-spec.md
+**/*-plan.md
+docs/
+specs/
+plans/
+!README.md
