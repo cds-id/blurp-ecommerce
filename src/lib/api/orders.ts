@@ -60,6 +60,7 @@ export interface OrderDetail {
   updated_at: string | null;
   items: OrderItemDetail[];
   guest_tracking_token?: string;
+  payment_url?: string | null;
 }
 
 export interface ShippingQuoteRequest {

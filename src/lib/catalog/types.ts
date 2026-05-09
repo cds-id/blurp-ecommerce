@@ -18,6 +18,10 @@ export type CatalogProduct = {
   is_active?: boolean | null;
   created_at?: string | null;
   updated_at?: string | null;
+  /** Present on list responses; detail may include alongside `media`. */
+  primary_image_url?: string | null;
+  /** If serde / gateway emits camelCase */
+  primaryImageUrl?: string | null;
 };
 
 export type CatalogProductMedia = {
@@ -44,6 +48,10 @@ export type CatalogVariant = {
   sku: string;
   price_idr: number;
   stock: number;
+  /** Per-variant hero / card image when backend supports it */
+  primary_image_url?: string | null;
+  image_url?: string | null;
+  primaryImageUrl?: string | null;
 };
 
 export type CatalogVariantDetail = {

@@ -11,42 +11,26 @@ import { SafeImage } from "@/src/components/shared/safe-image";
 import { Skeleton, CartItemSkeleton } from "@/src/components/shared/skeleton";
 import { useSimulatedLoading } from "@/src/hooks/use-simulated-loading";
 
-function makeUiLineKey(line: { productId: string; color?: string; size?: string }) {
-  return `${line.productId}::${line.color ?? ""}::${line.size ?? ""}`;
-}
-
 export function DesktopCart() {
   const cart = useCart();
   const isLoading = useSimulatedLoading(700);
 
   const items = useMemo(() => {
-    return cart.items
-      .map((it) => ({
-        key: makeUiLineKey(it.line),
-        line: it.line,
-        product: it.product,
-      }))
-      .filter((it) => Boolean(it.product));
-  }, [cart.items]);
+    return cart.lineItems.map((li) => ({
+      key: li.cart_item_id,
+      li,
+    }));
+  }, [cart.lineItems]);
 
-  const subtotal = useMemo(() => {
-    return items.reduce((sum, it) => {
-      const price = it.product?.price ?? 0;
-      return sum + price * it.line.quantity;
-    }, 0);
-  }, [items]);
+  const subtotal = cart.subtotal;
+  const totalUnits = cart.count;
 
-  const totalUnits = useMemo(
-    () => items.reduce((sum, it) => sum + it.line.quantity, 0),
-    [items]
-  );
-
-  const updateQuantity = (productId: string, quantity: number, variant?: { color?: string; size?: string }) => {
-    cart.setQuantity(productId, quantity, variant);
+  const updateQuantity = (cartItemId: string, quantity: number) => {
+    void cart.setItemQuantity(cartItemId, quantity);
   };
 
-  const removeItem = (productId: string, variant?: { color?: string; size?: string }) => {
-    cart.removeItem(productId, variant);
+  const removeItem = (cartItemId: string) => {
+    void cart.removeItem(cartItemId);
   };
 
   const showSkeleton = !cart.isHydrated || isLoading;
@@ -153,20 +137,14 @@ export function DesktopCart() {
               {items.map((item) => (
                 <li key={item.key} className="p-5 flex gap-5">
                   <Link
-                    href={`/store/product/${item.product!.slug}`}
+                    href={`/store/product/${item.li.product_id}`}
                     className="h-28 w-28 rounded-xl overflow-hidden bg-surface-soft flex-shrink-0"
                   >
                     <SafeImage
-                      src={
-                        item.product?.images?.[0] ||
-                        `https://picsum.photos/seed/${item.product?.slug ?? item.line.productId}/240/240`
-                      }
-                      alt={item.product?.name ?? "Produk"}
+                      src={item.li.image_url ?? ""}
+                      alt={item.li.product_name ?? "Produk"}
                       className="w-full h-full object-cover"
                       loading="lazy"
-                      fallbackSrcs={[
-                        `https://picsum.photos/seed/${item.product?.slug ?? item.line.productId}-fallback/240/240`,
-                      ]}
                     />
                   </Link>
 
@@ -174,34 +152,27 @@ export function DesktopCart() {
                     <div className="flex items-start gap-4">
                       <div className="min-w-0 flex-1">
                         <Link
-                          href={`/store/product/${item.product!.slug}`}
+                          href={`/store/product/${item.li.product_id}`}
                           className="text-base font-semibold text-ink hover:underline underline-offset-2 line-clamp-2"
                         >
-                          {item.product!.name}
+                          {item.li.product_name}
                         </Link>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-                          {item.line.color && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-soft border border-hairline text-ink/70">
-                              {item.line.color}
-                            </span>
-                          )}
-                          {item.line.size && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-soft border border-hairline text-ink/70">
-                              {item.line.size}
-                            </span>
-                          )}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-soft border border-hairline text-ink/70">
+                            {item.li.variant_name}
+                          </span>
                           <span className="text-muted">
-                            Stok {item.product!.stock}
+                            SKU {item.li.sku}
                           </span>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-base font-semibold text-ink tabular-nums">
-                          {formatPrice(item.product!.price * item.line.quantity)}
+                          {formatPrice(item.li.subtotal_idr)}
                         </div>
-                        {item.line.quantity > 1 && (
+                        {item.li.quantity > 1 && (
                           <div className="text-xs text-muted tabular-nums mt-0.5">
-                            {formatPrice(item.product!.price)} × {item.line.quantity}
+                            {formatPrice(item.li.price_idr)} × {item.li.quantity}
                           </div>
                         )}
                       </div>
@@ -209,25 +180,14 @@ export function DesktopCart() {
 
                     <div className="mt-auto pt-4 flex items-center justify-between">
                       <QuantityPicker
-                        value={item.line.quantity}
-                        onChange={(qty) =>
-                          updateQuantity(item.line.productId, qty, {
-                            color: item.line.color,
-                            size: item.line.size,
-                          })
-                        }
-                        max={item.product!.stock}
+                        value={item.li.quantity}
+                        onChange={(qty) => updateQuantity(item.li.cart_item_id, qty)}
                       />
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-muted hover:text-destructive rounded-full"
-                        onClick={() =>
-                          removeItem(item.line.productId, {
-                            color: item.line.color,
-                            size: item.line.size,
-                          })
-                        }
+                        onClick={() => removeItem(item.li.cart_item_id)}
                       >
                         <Trash2 className="h-4 w-4 mr-1.5" />
                         Hapus

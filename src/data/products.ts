@@ -1,3 +1,15 @@
+/** One purchasable SKU from the catalog API (for detail variant picker + cart). */
+export type ProductVariantOption = {
+  id: string;
+  name: string;
+  sku: string;
+  priceIdr: number;
+  stock: number;
+  attributes: { key: string; value: string }[];
+  /** Optional cover image for this SKU (from catalog API). */
+  imageUrl?: string;
+};
+
 export interface Product {
   id: string;
   slug: string;
@@ -10,6 +22,8 @@ export interface Product {
   images: string[];
   colors: { name: string; value: string }[];
   sizes: string[];
+  /** When set (catalog detail), prefer this for add-to-cart and price/stock. */
+  variantOptions?: ProductVariantOption[];
   stock: number;
   rating: number;
   reviewCount: number;

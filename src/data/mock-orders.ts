@@ -2,7 +2,13 @@ import { useSyncExternalStore } from "react";
 
 export const LAST_ORDER_STORAGE_KEY = "sorastore.lastOrder.v1" as const;
 
-export type MockOrderStatus = "created" | "paid" | "packed" | "shipped" | "delivered";
+export type MockOrderStatus =
+  | "created"
+  | "paid"
+  | "packed"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
 
 export type MockOrder = {
   id: string; // e.g. ORD-12345
@@ -10,6 +16,12 @@ export type MockOrder = {
   createdAt: string; // ISO
   total: number;
   status: MockOrderStatus;
+  /**
+   * Guest tracking token (JWT, 30d). Returned by backend on guest checkout.
+   * Use with `ordersApi.guestOrderLookup(token)` or `/store/tracker?token=...`.
+   * Optional — not present for legacy/mock orders or authenticated orders.
+   */
+  guest_tracking_token?: string;
 };
 
 export const mockOrders: MockOrder[] = [
@@ -47,7 +59,17 @@ export function readLastOrder(): MockOrder | null {
     if (typeof o.phone !== "string") return null;
     if (typeof o.createdAt !== "string") return null;
     if (typeof o.total !== "number") return null;
-    if (o.status !== "created" && o.status !== "paid" && o.status !== "packed" && o.status !== "shipped" && o.status !== "delivered") {
+    if (
+      o.status !== "created" &&
+      o.status !== "paid" &&
+      o.status !== "packed" &&
+      o.status !== "shipped" &&
+      o.status !== "delivered" &&
+      o.status !== "cancelled"
+    ) {
+      return null;
+    }
+    if (o.guest_tracking_token !== undefined && typeof o.guest_tracking_token !== "string") {
       return null;
     }
     return o as MockOrder;
