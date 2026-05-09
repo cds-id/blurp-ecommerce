@@ -22,8 +22,8 @@ import type { ApiMeta } from "@/src/lib/api/types";
 const sortOptions = [
   { value: "popular", label: "Terpopuler" },
   { value: "newest", label: "Terbaru" },
-  { value: "price-asc", label: "Harga: Rendah ke Tinggi" },
-  { value: "price-desc", label: "Harga: Tinggi ke Rendah" },
+  { value: "price_asc", label: "Harga: Rendah ke Tinggi" },
+  { value: "price_desc", label: "Harga: Tinggi ke Rendah" },
 ];
 
 const sizes = ["S", "M", "L", "XL", "XXL"];
@@ -32,6 +32,7 @@ interface DesktopCatalogProps {
   categories: Category[];
   products: Product[];
   selectedCategory?: string;
+  selectedCategories?: string[];
   searchQuery?: string;
   meta?: ApiMeta | null;
 }
@@ -51,14 +52,20 @@ export function DesktopCatalog({
   categories,
   products,
   selectedCategory,
+  selectedCategories,
   meta,
 }: DesktopCatalogProps) {
-  const [sortBy, setSortBy] = useState("popular");
+  const sp = useSearchParams();
+  const sortBy = sp.get("sort") ?? "popular";
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const router = useRouter();
   const pathname = usePathname();
-  const sp = useSearchParams();
   const category = selectedCategory;
+  const categorySet = useMemo(() => new Set(selectedCategories ?? (category ? [category] : [])), [category, selectedCategories]);
+
+  const selectedSize = sp.get("size") ?? "";
+  const minPrice = sp.get("min_price_idr") ?? "";
+  const maxPrice = sp.get("max_price_idr") ?? "";
 
   const totalLabel = useMemo(() => {
     const total = meta?.total;
@@ -66,7 +73,7 @@ export function DesktopCatalog({
     return `${products.length} produk ditemukan`;
   }, [meta?.total, products.length]);
 
-  const filtersDisabled = true;
+  const filtersDisabled = false;
 
   return (
     <div className="bg-background min-h-screen">
@@ -94,10 +101,15 @@ export function DesktopCatalog({
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <Checkbox
-                      checked={category === cat.slug}
+                      checked={categorySet.has(cat.slug)}
                       onCheckedChange={() => {
-                        const nextCategory = category === cat.slug ? undefined : cat.slug;
-                        const next = setQueryParam(new URLSearchParams(sp), "category", nextCategory);
+                        const next = new URLSearchParams(sp);
+                        const existing = next.getAll("category");
+                        const has = existing.includes(cat.slug);
+                        next.delete("category");
+                        const after = has ? existing.filter((x) => x !== cat.slug) : [...existing, cat.slug];
+                        for (const slug of after) next.append("category", slug);
+                        next.delete("page");
                         router.push(`${pathname}?${next.toString()}`);
                       }}
                     />
@@ -115,18 +127,25 @@ export function DesktopCatalog({
                 {sizes.map((size) => (
                   <Button
                     key={size}
-                    variant={"outline"}
+                    variant={selectedSize === size ? "secondary" : "outline"}
                     size="sm"
                     className="h-8 w-10"
-                    onClick={() => {}}
+                    onClick={() => {
+                      const next = new URLSearchParams(sp);
+                      if (selectedSize === size) next.delete("size");
+                      else next.set("size", size);
+                      next.delete("page");
+                      // backend expects repeated `attribute=key:value`
+                      next.delete("attribute");
+                      const sz = next.get("size");
+                      if (sz) next.append("attribute", `size:${sz}`);
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
                   >
                     {size}
                   </Button>
                 ))}
               </div>
-              {filtersDisabled && (
-                <p className="text-xs text-muted-foreground mt-2">Filter ukuran menunggu dukungan backend.</p>
-              )}
             </div>
 
             <Separator />
@@ -135,25 +154,72 @@ export function DesktopCatalog({
               <h3 className="font-semibold mb-3">Harga</h3>
               <div className="space-y-2 text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox />
+                  <Checkbox
+                    checked={minPrice === "" && maxPrice === "100000"}
+                    onCheckedChange={() => {
+                      const next = new URLSearchParams(sp);
+                      const isOn = minPrice === "" && maxPrice === "100000";
+                      next.delete("min_price_idr");
+                      next.delete("max_price_idr");
+                      if (!isOn) next.set("max_price_idr", "100000");
+                      next.delete("page");
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  />
                   <span>Di bawah Rp 100rb</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox />
+                  <Checkbox
+                    checked={minPrice === "100000" && maxPrice === "300000"}
+                    onCheckedChange={() => {
+                      const next = new URLSearchParams(sp);
+                      const isOn = minPrice === "100000" && maxPrice === "300000";
+                      next.delete("min_price_idr");
+                      next.delete("max_price_idr");
+                      if (!isOn) {
+                        next.set("min_price_idr", "100000");
+                        next.set("max_price_idr", "300000");
+                      }
+                      next.delete("page");
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  />
                   <span>Rp 100rb - 300rb</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox />
+                  <Checkbox
+                    checked={minPrice === "300000" && maxPrice === "500000"}
+                    onCheckedChange={() => {
+                      const next = new URLSearchParams(sp);
+                      const isOn = minPrice === "300000" && maxPrice === "500000";
+                      next.delete("min_price_idr");
+                      next.delete("max_price_idr");
+                      if (!isOn) {
+                        next.set("min_price_idr", "300000");
+                        next.set("max_price_idr", "500000");
+                      }
+                      next.delete("page");
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  />
                   <span>Rp 300rb - 500rb</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox />
+                  <Checkbox
+                    checked={minPrice === "500000" && maxPrice === ""}
+                    onCheckedChange={() => {
+                      const next = new URLSearchParams(sp);
+                      const isOn = minPrice === "500000" && maxPrice === "";
+                      next.delete("min_price_idr");
+                      next.delete("max_price_idr");
+                      if (!isOn) next.set("min_price_idr", "500000");
+                      next.delete("page");
+                      router.push(`${pathname}?${next.toString()}`);
+                    }}
+                  />
                   <span>Di atas Rp 500rb</span>
                 </label>
               </div>
-              {filtersDisabled && (
-                <p className="text-xs text-muted-foreground mt-2">Filter harga menunggu dukungan backend.</p>
-              )}
             </div>
 
             <Separator />
@@ -164,6 +230,11 @@ export function DesktopCatalog({
               onClick={() => {
                 const next = new URLSearchParams(sp);
                 next.delete("category");
+                next.delete("size");
+                next.delete("attribute");
+                next.delete("min_price_idr");
+                next.delete("max_price_idr");
+                next.delete("sort");
                 next.delete("page");
                 router.push(`${pathname}?${next.toString()}`);
               }}
@@ -180,7 +251,14 @@ export function DesktopCatalog({
                 {totalLabel}
               </p>
               <div className="flex items-center gap-4">
-                <Select value={sortBy} onValueChange={setSortBy} disabled>
+                <Select
+                  value={sortBy}
+                  onValueChange={(v) => {
+                    const next = setQueryParam(new URLSearchParams(sp), "sort", v);
+                    next.delete("page");
+                    router.push(`${pathname}?${next.toString()}`);
+                  }}
+                >
                   <SelectTrigger className="w-[200px]">
                     <SelectValue />
                   </SelectTrigger>

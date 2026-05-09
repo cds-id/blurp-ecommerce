@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Heart, Share2, Truck, ShieldCheck, RotateCcw, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { QuantityPicker } from "@/src/components/shared";
+import { QuantityPicker, VariantSelector } from "@/src/components/shared";
 import { SafeImage } from "@/src/components/shared/safe-image";
-import { Product } from "@/src/data/products";
+import { type Product } from "@/src/data/products";
 import { shippingOptions, cities } from "@/src/data/shipping";
 import { formatPrice, calculateDiscount, cn } from "@/src/lib/utils";
 import { useCart } from "@/src/components/shared/cart-provider";
@@ -24,7 +24,22 @@ interface MobileProductDetailProps {
   defaultVariantId?: string | null;
 }
 
+function pickInitialVariantId(product: Product, defaultVariantId?: string | null): string | null {
+  if (defaultVariantId) return defaultVariantId;
+  const opts = product.variantOptions;
+  if (!opts?.length) return null;
+  const inStock = opts.find((v) => v.stock > 0);
+  return (inStock ?? opts[0]).id;
+}
+
 export function MobileProductDetail({ product, defaultVariantId }: MobileProductDetailProps) {
+  const showVariantPicker = (product.variantOptions?.length ?? 0) > 1;
+  const showColorSize =
+    !showVariantPicker && (product.colors.length > 0 || product.sizes.length > 0);
+
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(() =>
+    pickInitialVariantId(product, defaultVariantId),
+  );
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "");
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -35,23 +50,50 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
   const [activeImage, setActiveImage] = useState(0);
   const { addVariant } = useCart();
 
+  const selectedOption = product.variantOptions?.find((v) => v.id === selectedVariantId);
+  const displayPrice = selectedOption?.priceIdr ?? product.price;
+  const displayStock = selectedOption?.stock ?? product.stock;
+
+  useEffect(() => {
+    setSelectedVariantId(pickInitialVariantId(product, defaultVariantId));
+    setSelectedColor(product.colors[0]?.name || "");
+    setSelectedSize("");
+    setQuantity(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset when navigating to another product
+  }, [product.slug, defaultVariantId]);
+
+  useEffect(() => {
+    if (displayStock <= 0) {
+      setQuantity(1);
+      return;
+    }
+    setQuantity((q) => Math.min(Math.max(1, q), displayStock));
+  }, [displayStock, selectedVariantId]);
+
+  useEffect(() => {
+    setActiveImage(0);
+  }, [selectedVariantId]);
+
+  const galleryImages = useMemo(() => {
+    const base = product.images?.length ? [...product.images] : [];
+    const v = selectedOption?.imageUrl?.trim();
+    if (!v) return base;
+    const rest = base.filter((u) => u !== v);
+    return [v, ...rest];
+  }, [product.images, selectedOption?.imageUrl]);
+
   const discount = product.originalPrice
-    ? calculateDiscount(product.originalPrice, product.price)
+    ? calculateDiscount(product.originalPrice, displayPrice)
     : null;
 
-  const isLowStock = product.stock <= 3;
-  
-  const imageVariants =
-    product.images && product.images.length > 0
-      ? product.images
-      : [];
+  const isLowStock = displayStock <= 3 && displayStock > 0;
 
   return (
     <div className="bg-canvas pb-24">
       {/* Image Carousel */}
       <div className="relative aspect-square overflow-hidden">
         <SafeImage
-          src={imageVariants[activeImage]}
+          src={galleryImages[activeImage] ?? ""}
           alt={product.name}
           className="w-full h-full object-cover"
           sizes="100vw"
@@ -80,7 +122,7 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
 
       {/* Thumbnails */}
       <div className="flex gap-2 p-4 overflow-x-auto scrollbar-hide">
-        {imageVariants.map((img, i) => (
+        {galleryImages.map((img, i) => (
           <button
             key={i}
             className={cn(
@@ -124,7 +166,7 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
 
           {/* Price */}
           <div className="flex items-baseline gap-2 mt-3">
-            <span className="text-2xl font-bold text-ink">{formatPrice(product.price)}</span>
+            <span className="text-2xl font-bold text-ink">{formatPrice(displayPrice)}</span>
             {product.originalPrice && (
               <>
                 <span className="text-sm text-muted line-through">
@@ -137,8 +179,16 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
 
         <Separator className="bg-hairline" />
 
+        {showVariantPicker && product.variantOptions && (
+          <VariantSelector
+            options={product.variantOptions}
+            value={selectedVariantId}
+            onValueChange={setSelectedVariantId}
+          />
+        )}
+
         {/* Color Selection */}
-        {product.colors.length > 0 && (
+        {showColorSize && product.colors.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold mb-3 text-ink">
               Warna: <span className="font-normal text-muted">{selectedColor}</span>
@@ -162,7 +212,7 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
         )}
 
         {/* Size Selection */}
-        {product.sizes.length > 0 && (
+        {showColorSize && product.sizes.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold mb-3 text-ink">Ukuran</h3>
             <div className="flex gap-3">
@@ -188,11 +238,11 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
             <QuantityPicker
               value={quantity}
               onChange={setQuantity}
-              max={product.stock}
+              max={displayStock > 0 ? displayStock : 1}
             />
             {isLowStock && (
               <span className="text-sm text-primary font-medium">
-                Sisa {product.stock}
+                Sisa {displayStock}
               </span>
             )}
           </div>
@@ -301,10 +351,10 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
           size="lg"
           className="flex-1 rounded-full font-semibold border-hairline h-12"
           onClick={() => {
-            if (!defaultVariantId) return;
-            void addVariant({ variantId: defaultVariantId, quantity });
+            if (!selectedVariantId) return;
+            void addVariant({ variantId: selectedVariantId, quantity });
           }}
-          disabled={!defaultVariantId}
+          disabled={!selectedVariantId || displayStock <= 0}
         >
           + Keranjang
         </Button>

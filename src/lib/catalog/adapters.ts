@@ -14,6 +14,16 @@ function isProbablyHexColor(value: string): boolean {
   return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value.trim());
 }
 
+/** Stable HSL for non-hex color labels (Natural Titanium, Black, …). */
+function stringToSwatchColor(label: string): string {
+  let h = 0;
+  for (let i = 0; i < label.length; i += 1) {
+    h = (h * 31 + label.charCodeAt(i)) | 0;
+  }
+  const hue = Math.abs(h) % 360;
+  return `hsl(${hue} 42% 52%)`;
+}
+
 function uniq<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
 }
@@ -22,6 +32,21 @@ function parseIso(s?: string | null): number | null {
   if (!s) return null;
   const t = Date.parse(s);
   return Number.isFinite(t) ? t : null;
+}
+
+/** Backend list + detail may expose snake_case and/or camelCase. */
+function catalogPrimaryImageUrl(p: CatalogProduct): string | null {
+  const u = p.primary_image_url ?? p.primaryImageUrl;
+  if (u == null) return null;
+  const s = String(u).trim();
+  return s.length > 0 ? s : null;
+}
+
+function variantCoverImageUrl(v: CatalogVariant): string | null {
+  const u = v.primary_image_url ?? v.primaryImageUrl ?? v.image_url;
+  if (u == null) return null;
+  const s = String(u).trim();
+  return s.length > 0 ? s : null;
 }
 
 export function toUiCategories(cats: CatalogCategory[]): Category[] {
@@ -55,9 +80,10 @@ export function toUiProduct(
     category: cat?.name ?? "Catalog",
     categorySlug: cat?.slug ?? "catalog",
     price: p.base_price_idr,
-    // Do not fabricate image URLs for catalog list.
-    // If backend doesn't provide media in list, UI should show broken placeholder.
-    images: [],
+    images: (() => {
+      const u = catalogPrimaryImageUrl(p);
+      return u ? [u] : [];
+    })(),
     colors: [],
     sizes: [],
     stock: 0,
@@ -80,6 +106,16 @@ function findAttributeValues(
     .map((a) => a.value)
     .filter(Boolean);
 }
+
+const SIZE_ATTRIBUTE_KEYS = [
+  "size",
+  "ukuran",
+  "storage",
+  "memory",
+  "kapasitas",
+  "capacity",
+  "penyimpanan",
+] as const;
 
 export function toUiProductDetail(
   detail: CatalogProductDetail,
@@ -113,24 +149,61 @@ export function toUiProductDetail(
   const stock = variants.reduce((sum, v) => sum + (getVariantCore(v).stock ?? 0), 0);
 
   const media = [...(detail.media ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-  const images = media
+  const fromMedia = media
     .map((m) => m.cdn_url)
-    .filter((u): u is string => Boolean(u))
-    .slice(0, 8);
+    .filter((u): u is string => Boolean(u));
+  const primary = catalogPrimaryImageUrl(p);
+  const variantImageUrls = uniq(
+    variants
+      .map((v) => variantCoverImageUrl(getVariantCore(v)))
+      .filter((u): u is string => Boolean(u)),
+  );
+  let imageList = uniq([...fromMedia, ...variantImageUrls]);
+  if (imageList.length === 0 && primary) imageList = [primary];
+  else imageList = imageList.slice(0, 12);
 
   const allAttrs = variants.flatMap(getVariantAttrs);
-  const sizes = uniq([
-    ...findAttributeValues(allAttrs, "size"),
-    ...findAttributeValues(allAttrs, "ukuran"),
-  ]);
+  const sizes = uniq(
+    SIZE_ATTRIBUTE_KEYS.flatMap((k) => findAttributeValues(allAttrs, k)),
+  );
 
   const colorValues = uniq([
     ...findAttributeValues(allAttrs, "color"),
     ...findAttributeValues(allAttrs, "warna"),
+    ...findAttributeValues(allAttrs, "colour"),
   ]);
-  const colors = colorValues
-    .filter(isProbablyHexColor)
-    .map((hex) => ({ name: hex.toUpperCase(), value: hex }));
+  const colors = colorValues.map((c) => {
+    const trimmed = c.trim();
+    if (isProbablyHexColor(trimmed)) {
+      return { name: trimmed.toUpperCase(), value: trimmed };
+    }
+    return { name: trimmed, value: stringToSwatchColor(trimmed) };
+  });
+
+  const variantOptions =
+    variants.length > 0
+      ? variants.map((v) => {
+          const core = getVariantCore(v);
+          const attrs = getVariantAttrs(v).map((a) => ({
+            key: String(a.key ?? ""),
+            value: String(a.value ?? ""),
+          }));
+          const label =
+            (core.name && core.name.trim()) ||
+            attrs.map((x) => x.value).filter(Boolean).join(" · ") ||
+            core.sku;
+          const img = variantCoverImageUrl(core);
+          return {
+            id: core.id,
+            name: label,
+            sku: core.sku,
+            priceIdr: core.price_idr,
+            stock: core.stock ?? 0,
+            attributes: attrs,
+            ...(img ? { imageUrl: img } : {}),
+          };
+        })
+      : undefined;
 
   return {
     id: p.id,
@@ -140,10 +213,11 @@ export function toUiProductDetail(
     category: cat?.name ?? "Catalog",
     categorySlug: cat?.slug ?? "catalog",
     price,
-    // Only use real backend media URLs; show broken placeholder if missing.
-    images,
+    // Product media plus per-variant images when provided by the API.
+    images: imageList,
     colors,
     sizes,
+    variantOptions,
     stock,
     rating: 0,
     reviewCount: 0,

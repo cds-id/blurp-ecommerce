@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -30,8 +30,8 @@ import type { ApiMeta } from "@/src/lib/api/types";
 const sortOptions = [
   { value: "popular", label: "Terpopuler" },
   { value: "newest", label: "Terbaru" },
-  { value: "price-asc", label: "Harga ↑" },
-  { value: "price-desc", label: "Harga ↓" },
+  { value: "price_asc", label: "Harga ↑" },
+  { value: "price_desc", label: "Harga ↓" },
 ];
 
 const sizes = ["S", "M", "L", "XL", "XXL"];
@@ -40,6 +40,7 @@ interface MobileCatalogProps {
   categories: Category[];
   products: Product[];
   selectedCategory?: string;
+  selectedCategories?: string[];
   searchQuery?: string;
   meta?: ApiMeta | null;
 }
@@ -59,16 +60,29 @@ export function MobileCatalog({
   categories,
   products,
   selectedCategory,
+  selectedCategories,
   meta,
 }: MobileCatalogProps) {
-  const [sortBy, setSortBy] = useState("popular");
+  const sp = useSearchParams();
+  const sortBy = sp.get("sort") ?? "popular";
   const router = useRouter();
   const pathname = usePathname();
-  const sp = useSearchParams();
   const category = selectedCategory;
 
-  const filtersDisabled = true;
-  const activeFilterCount = category ? 1 : 0;
+  const categorySet = useMemo(
+    () => new Set(selectedCategories ?? (category ? [category] : [])),
+    [category, selectedCategories]
+  );
+  const selectedSize = sp.get("size") ?? "";
+  const minPrice = sp.get("min_price_idr") ?? "";
+  const maxPrice = sp.get("max_price_idr") ?? "";
+
+  const filtersDisabled = false;
+  const activeFilterCount =
+    (categorySet.size > 0 ? 1 : 0) +
+    (selectedSize ? 1 : 0) +
+    (minPrice || maxPrice ? 1 : 0) +
+    (sortBy && sortBy !== "popular" ? 1 : 0);
   const totalLabel = useMemo(() => {
     const total = meta?.total;
     if (typeof total === "number") return `${total} produk`;
@@ -106,10 +120,14 @@ export function MobileCatalog({
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <Checkbox
-                        checked={category === cat.slug}
+                        checked={categorySet.has(cat.slug)}
                         onCheckedChange={() => {
-                          const nextCategory = category === cat.slug ? undefined : cat.slug;
-                          const next = setQueryParam(new URLSearchParams(sp), "category", nextCategory);
+                          const next = new URLSearchParams(sp);
+                          const existing = next.getAll("category");
+                          const has = existing.includes(cat.slug);
+                          next.delete("category");
+                          const after = has ? existing.filter((x) => x !== cat.slug) : [...existing, cat.slug];
+                          for (const slug of after) next.append("category", slug);
                           next.delete("page");
                           router.push(`${pathname}?${next.toString()}`);
                         }}
@@ -128,18 +146,98 @@ export function MobileCatalog({
                   {sizes.map((size) => (
                     <Button
                       key={size}
-                      variant={"outline"}
+                      variant={selectedSize === size ? "secondary" : "outline"}
                       size="sm"
                       className="h-8 w-10"
-                      onClick={() => {}}
+                      onClick={() => {
+                        const next = new URLSearchParams(sp);
+                        if (selectedSize === size) next.delete("size");
+                        else next.set("size", size);
+                        next.delete("page");
+                        next.delete("attribute");
+                        const sz = next.get("size");
+                        if (sz) next.append("attribute", `size:${sz}`);
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
                     >
                       {size}
                     </Button>
                   ))}
                 </div>
-                {filtersDisabled && (
-                  <p className="text-xs text-muted-foreground mt-2">Filter ukuran menunggu dukungan backend.</p>
-                )}
+              </div>
+
+              <Separator />
+
+              <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
+                <h4 className="font-medium mb-3">Harga</h4>
+                <div className="space-y-2 text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={minPrice === "" && maxPrice === "100000"}
+                      onCheckedChange={() => {
+                        const next = new URLSearchParams(sp);
+                        const isOn = minPrice === "" && maxPrice === "100000";
+                        next.delete("min_price_idr");
+                        next.delete("max_price_idr");
+                        if (!isOn) next.set("max_price_idr", "100000");
+                        next.delete("page");
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
+                    />
+                    <span>Di bawah Rp 100rb</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={minPrice === "100000" && maxPrice === "300000"}
+                      onCheckedChange={() => {
+                        const next = new URLSearchParams(sp);
+                        const isOn = minPrice === "100000" && maxPrice === "300000";
+                        next.delete("min_price_idr");
+                        next.delete("max_price_idr");
+                        if (!isOn) {
+                          next.set("min_price_idr", "100000");
+                          next.set("max_price_idr", "300000");
+                        }
+                        next.delete("page");
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
+                    />
+                    <span>Rp 100rb - 300rb</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={minPrice === "300000" && maxPrice === "500000"}
+                      onCheckedChange={() => {
+                        const next = new URLSearchParams(sp);
+                        const isOn = minPrice === "300000" && maxPrice === "500000";
+                        next.delete("min_price_idr");
+                        next.delete("max_price_idr");
+                        if (!isOn) {
+                          next.set("min_price_idr", "300000");
+                          next.set("max_price_idr", "500000");
+                        }
+                        next.delete("page");
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
+                    />
+                    <span>Rp 300rb - 500rb</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={minPrice === "500000" && maxPrice === ""}
+                      onCheckedChange={() => {
+                        const next = new URLSearchParams(sp);
+                        const isOn = minPrice === "500000" && maxPrice === "";
+                        next.delete("min_price_idr");
+                        next.delete("max_price_idr");
+                        if (!isOn) next.set("min_price_idr", "500000");
+                        next.delete("page");
+                        router.push(`${pathname}?${next.toString()}`);
+                      }}
+                    />
+                    <span>Di atas Rp 500rb</span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -150,6 +248,11 @@ export function MobileCatalog({
                 onClick={() => {
                   const next = new URLSearchParams(sp);
                   next.delete("category");
+                  next.delete("size");
+                  next.delete("attribute");
+                  next.delete("min_price_idr");
+                  next.delete("max_price_idr");
+                  next.delete("sort");
                   next.delete("page");
                   router.push(`${pathname}?${next.toString()}`);
                 }}
@@ -163,7 +266,14 @@ export function MobileCatalog({
           </SheetContent>
         </Sheet>
 
-        <Select value={sortBy} onValueChange={setSortBy} disabled>
+        <Select
+          value={sortBy}
+          onValueChange={(v) => {
+            const next = setQueryParam(new URLSearchParams(sp), "sort", v);
+            next.delete("page");
+            router.push(`${pathname}?${next.toString()}`);
+          }}
+        >
           <SelectTrigger className="w-[130px] h-9">
             <SelectValue />
           </SelectTrigger>
@@ -180,9 +290,9 @@ export function MobileCatalog({
       {/* Active Filters */}
       {activeFilterCount > 0 && (
         <div className="px-4 py-2 flex flex-wrap gap-2 border-b border-hairline">
-          {category ? (
+          {categorySet.size > 0 ? (
             <Button
-              key={category}
+              key={[...categorySet].join(",")}
               variant="secondary"
               size="sm"
               className="h-7 gap-1 text-xs"
@@ -193,7 +303,43 @@ export function MobileCatalog({
                 router.push(`${pathname}?${next.toString()}`);
               }}
             >
-              {categories.find((c) => c.slug === category)?.name ?? category}
+              {categorySet.size} kategori
+              <X className="h-3 w-3" />
+            </Button>
+          ) : null}
+          {selectedSize ? (
+            <Button
+              key={`size:${selectedSize}`}
+              variant="secondary"
+              size="sm"
+              className="h-7 gap-1 text-xs"
+              onClick={() => {
+                const next = new URLSearchParams(sp);
+                next.delete("size");
+                next.delete("attribute");
+                next.delete("page");
+                router.push(`${pathname}?${next.toString()}`);
+              }}
+            >
+              Ukuran {selectedSize}
+              <X className="h-3 w-3" />
+            </Button>
+          ) : null}
+          {minPrice || maxPrice ? (
+            <Button
+              key={`price:${minPrice}-${maxPrice}`}
+              variant="secondary"
+              size="sm"
+              className="h-7 gap-1 text-xs"
+              onClick={() => {
+                const next = new URLSearchParams(sp);
+                next.delete("min_price_idr");
+                next.delete("max_price_idr");
+                next.delete("page");
+                router.push(`${pathname}?${next.toString()}`);
+              }}
+            >
+              Harga
               <X className="h-3 w-3" />
             </Button>
           ) : null}
