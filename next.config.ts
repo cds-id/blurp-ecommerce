@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  async redirects() {
+    return [
+      // Backend guest tracking emails link to /track?token=... — keep that path
+      // working by redirecting into the existing tracker page.
+      { source: "/track", destination: "/store/tracker", permanent: false },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },

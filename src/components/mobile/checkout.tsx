@@ -16,15 +16,8 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
-import { cities } from "@/src/data/shipping";
 import { cn, formatPrice } from "@/src/lib/utils";
+import { LocationPicker, type LocationPickerValue } from "@/src/components/shared/location-picker";
 import Link from "next/link";
 import { useCart } from "@/src/components/shared/cart-provider";
 import { saveLastOrder } from "@/src/data/mock-orders";
@@ -54,14 +47,18 @@ export function MobileCheckout() {
   const cart = useCart();
   const { isAuthenticated } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedCity, setSelectedCity] = useState("");
   const [selectedShipping, setSelectedShipping] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [location, setLocation] = useState<LocationPickerValue>({
+    district_id: null,
+    province: "",
+    city: "",
+    district: "",
+    postal_code: "",
+  });
   const [showSummary, setShowSummary] = useState(false);
   const isSummaryLoading = useSimulatedLoading(700);
   const [shippingChoices, setShippingChoices] = useState<ShippingOption[]>([]);
@@ -77,15 +74,15 @@ export function MobileCheckout() {
   const total = subtotal + shippingCost;
 
   const canProceed = () => {
-    if (step === 1) return Boolean(name && phone && email && address && selectedCity && districtId);
+    if (step === 1)
+      return Boolean(name && phone && email && address && location.district_id);
     if (step === 2) return Boolean(selectedShipping);
     if (step === 3) return true;
     return false;
   };
 
   const loadShippingOptions = async () => {
-    const cityObj = cities.find((c) => c.id === selectedCity);
-    if (!cityObj || !districtId) return;
+    if (!location.district_id) return;
     setIsLoadingShipping(true);
     setShippingError(null);
     try {
@@ -96,11 +93,11 @@ export function MobileCheckout() {
             email,
             phone: normalizePhone(phone),
             street: address,
-            city: cityObj.name,
-            province: cityObj.province,
-            postal_code: postalCode || "00000",
+            city: location.city,
+            province: location.province,
+            postal_code: location.postal_code || "00000",
             country: "ID",
-            district_id: districtId,
+            district_id: location.district_id,
           },
         });
         setShippingChoices(quote.shipping_options);
@@ -114,7 +111,7 @@ export function MobileCheckout() {
         }
         const res = await shippingApi.shippingCost({
           origin_district_id: cfg.origin_district_id,
-          destination_district_id: districtId,
+          destination_district_id: location.district_id,
           weight_grams: weight,
           couriers: ["jne", "jnt", "sicepat"],
         });
@@ -155,8 +152,7 @@ export function MobileCheckout() {
       return;
     }
 
-    const cityObj = cities.find((c) => c.id === selectedCity) ?? null;
-    if (!cityObj || !districtId || !shippingOpt) return;
+    if (!location.district_id || !shippingOpt) return;
 
     setIsPlacingOrder(true);
     try {
@@ -166,11 +162,11 @@ export function MobileCheckout() {
           email,
           phone: normalizePhone(phone),
           street: address,
-          city: cityObj.name,
-          province: cityObj.province,
-          postal_code: postalCode || "00000",
+          city: location.city,
+          province: location.province,
+          postal_code: location.postal_code || "00000",
           country: "ID",
-          district_id: districtId,
+          district_id: location.district_id,
         },
         courier_code: shippingOpt.courier_code,
         service_code: shippingOpt.service_code,
@@ -182,6 +178,7 @@ export function MobileCheckout() {
         createdAt: new Date().toISOString(),
         total: order.total_idr ?? total,
         status: "paid",
+        guest_tracking_token: order.guest_tracking_token,
       });
       await cart.clear();
 
@@ -221,8 +218,6 @@ export function MobileCheckout() {
       </div>
     );
   }
-
-  const cityName = (id: string) => cities.find((c) => c.id === id)?.name ?? "";
 
   return (
     <div className="bg-background pb-44">
@@ -309,42 +304,15 @@ export function MobileCheckout() {
                 placeholder="kamu@email.com"
               />
             </Field>
-            <Field label="Kota" required>
-              <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger className="h-11 rounded-xl border-hairline">
-                  <SelectValue placeholder="Pilih kota..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city.id} value={city.id}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Kode pos" helper="Opsional (akan diganti dari location search)">
+            <LocationPicker value={location} onChange={setLocation} />
+            <Field label="Kode pos" helper="Terisi otomatis dari pilihan lokasi (boleh diubah).">
               <Input
                 className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                value={location.postal_code}
+                onChange={(e) =>
+                  setLocation((v) => ({ ...v, postal_code: e.target.value }))
+                }
                 placeholder="40123"
-                inputMode="numeric"
-              />
-            </Field>
-            <Field
-              label="District ID"
-              required
-              helper="Backend checkout butuh district_id. Sementara isi manual (akan diganti location search)."
-            >
-              <Input
-                className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
-                value={districtId ? String(districtId) : ""}
-                onChange={(e) => {
-                  const n = Number(e.target.value);
-                  setDistrictId(Number.isFinite(n) && n > 0 ? n : null);
-                }}
-                placeholder="contoh: 1234"
                 inputMode="numeric"
               />
             </Field>
@@ -367,7 +335,7 @@ export function MobileCheckout() {
                 Pilih pengiriman
               </h2>
               <p className="text-xs text-muted mt-0.5">
-                Estimasi tiba ke {cityName(selectedCity) || "kota tujuan"}.
+                Estimasi tiba ke {location.city || "kota tujuan"}.
               </p>
             </header>
             {isLoadingShipping ? (
@@ -439,7 +407,7 @@ export function MobileCheckout() {
               </p>
               <p className="text-xs text-muted mt-1">
                 {address || "—"}
-                {selectedCity && `, ${cityName(selectedCity)}`}
+                {location.city && `, ${location.city}`}
               </p>
               <button
                 type="button"

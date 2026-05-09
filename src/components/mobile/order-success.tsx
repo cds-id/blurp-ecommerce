@@ -8,6 +8,8 @@ import {
   Package,
   MessageCircle,
   ShieldCheck,
+  AlertTriangle,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { formatPrice } from "@/src/lib/utils";
@@ -30,6 +32,7 @@ const STATUS_INDEX: Record<MockOrder["status"], number> = {
   packed: 1,
   shipped: 2,
   delivered: 3,
+  cancelled: -1,
 };
 
 export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
@@ -38,6 +41,11 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
   const total = order?.total ?? 0;
   const status: MockOrder["status"] = order?.status ?? "paid";
   const currentIdx = STATUS_INDEX[status];
+  const isCancelled = status === "cancelled";
+  const trackerHref =
+    order?.guest_tracking_token
+      ? `/store/tracker?token=${encodeURIComponent(order.guest_tracking_token)}`
+      : "/store/tracker";
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -46,13 +54,25 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
   return (
     <div className="bg-background pb-12">
       <div className="text-center pt-8 pb-6 px-6 border-b border-hairline">
-        <div className="h-16 w-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3 ring-4 ring-emerald-100">
-          <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-        </div>
-        <h1 className="text-xl font-semibold mb-1">Pesanan berhasil!</h1>
-        <p className="text-sm text-muted">
-          Konfirmasi pembayaran sudah masuk.
-        </p>
+        {isCancelled ? (
+          <>
+            <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3 ring-4 ring-red-100">
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+            </div>
+            <h1 className="text-xl font-semibold mb-1">Pesanan dibatalkan</h1>
+            <p className="text-sm text-muted">Stok sudah dikembalikan.</p>
+          </>
+        ) : (
+          <>
+            <div className="h-16 w-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3 ring-4 ring-emerald-100">
+              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+            </div>
+            <h1 className="text-xl font-semibold mb-1">Pesanan berhasil!</h1>
+            <p className="text-sm text-muted">
+              Konfirmasi pembayaran sudah masuk.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
@@ -78,14 +98,45 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
               <div className="text-base font-semibold tabular-nums">
                 {total ? formatPrice(total) : "—"}
               </div>
-              <p className="text-[11px] text-emerald-600 inline-flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                Lunas via Xendit
-              </p>
+              {!isCancelled && (
+                <p className="text-[11px] text-emerald-600 inline-flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3" />
+                  Lunas via Xendit
+                </p>
+              )}
             </div>
           </div>
         </div>
 
+        {isCancelled ? (
+          <div className="rounded-2xl border border-hairline bg-white p-4">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-full bg-red-50 ring-4 ring-red-100/60 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink">Pesanan dibatalkan</p>
+                <p className="text-[11px] text-muted mt-0.5">
+                  Stok sudah dikembalikan. Jika sudah bayar, dana akan direfund.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button asChild variant="outline" size="sm" className="rounded-full border-hairline h-8 text-xs">
+                    <Link href="/store/catalog">
+                      <ShoppingBag className="w-3 h-3 mr-1" />
+                      Belanja lagi
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="rounded-full h-8 text-xs">
+                    <Link href="/kontak">
+                      <MessageCircle className="w-3 h-3 mr-1" />
+                      Hubungi CS
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="rounded-2xl border border-hairline bg-white p-4">
           <h2 className="font-semibold text-sm mb-1">Status pesanan</h2>
           <p className="text-[11px] text-muted mb-4">
@@ -134,12 +185,13 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
             })}
           </ol>
         </div>
+        )}
 
         <div className="rounded-2xl border border-hairline bg-surface-soft p-4">
           <h2 className="font-semibold text-sm mb-3">Apa selanjutnya?</h2>
           <div className="space-y-2">
             <Link
-              href="/store/tracker"
+              href={trackerHref}
               className="flex items-center gap-3 p-3 rounded-xl bg-white border border-hairline"
             >
               <div className="h-9 w-9 rounded-full bg-surface-soft flex items-center justify-center">
@@ -167,9 +219,39 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
           </div>
         </div>
 
+        {order?.guest_tracking_token && (
+          <div className="rounded-2xl border border-hairline bg-white p-4">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-full bg-emerald-50 ring-4 ring-emerald-100/60 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink">Simpan link pelacakan</p>
+                <p className="text-[11px] text-muted mt-0.5">
+                  Tanpa akun, link inilah cara cek status pesanan kapan saja.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    copyToClipboard(
+                      typeof window !== "undefined"
+                        ? `${window.location.origin}${trackerHref}`
+                        : trackerHref,
+                    )
+                  }
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-ink rounded-full border border-hairline px-3 py-1.5"
+                >
+                  <Copy className="w-3 h-3" />
+                  Salin link
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-2 pt-2">
           <Button className="w-full h-12 rounded-full text-sm font-semibold" asChild>
-            <Link href="/store/tracker">
+            <Link href={trackerHref}>
               Lacak pesanan
               <ArrowRight className="h-4 w-4 ml-2" />
             </Link>

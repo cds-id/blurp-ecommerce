@@ -4,3 +4,4 @@ export * from "./quantity-picker";
 export * from "./skeleton";
 export * from "./product-grid";
 export * from "./variant-selector";
+export * from "./location-picker";

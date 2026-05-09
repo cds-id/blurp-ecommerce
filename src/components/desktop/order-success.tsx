@@ -9,6 +9,8 @@ import {
   MapPin,
   MessageCircle,
   ShieldCheck,
+  AlertTriangle,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { formatPrice } from "@/src/lib/utils";
@@ -31,6 +33,7 @@ const STATUS_INDEX: Record<MockOrder["status"], number> = {
   packed: 1,
   shipped: 2,
   delivered: 3,
+  cancelled: -1,
 };
 
 export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
@@ -39,6 +42,11 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
   const total = order?.total ?? 0;
   const status: MockOrder["status"] = order?.status ?? "paid";
   const currentIdx = STATUS_INDEX[status];
+  const isCancelled = status === "cancelled";
+  const trackerHref =
+    order?.guest_tracking_token
+      ? `/store/tracker?token=${encodeURIComponent(order.guest_tracking_token)}`
+      : "/store/tracker";
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -47,15 +55,29 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-6 py-10 max-w-3xl">
-        {/* Success Header */}
+        {/* Success / Cancelled Header */}
         <div className="text-center mb-8">
-          <div className="h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4 ring-4 ring-emerald-100">
-            <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight mb-2">Pesanan kamu siap diproses</h1>
-          <p className="text-muted">
-            Terima kasih telah berbelanja. Konfirmasi pembayaran sudah masuk.
-          </p>
+          {isCancelled ? (
+            <>
+              <div className="h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 ring-4 ring-red-100">
+                <AlertTriangle className="h-10 w-10 text-red-600" />
+              </div>
+              <h1 className="text-3xl font-semibold tracking-tight mb-2">Pesanan dibatalkan</h1>
+              <p className="text-muted">
+                Pesanan ini sudah dibatalkan. Stok sudah dikembalikan.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4 ring-4 ring-emerald-100">
+                <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+              </div>
+              <h1 className="text-3xl font-semibold tracking-tight mb-2">Pesanan kamu siap diproses</h1>
+              <p className="text-muted">
+                Terima kasih telah berbelanja. Konfirmasi pembayaran sudah masuk.
+              </p>
+            </>
+          )}
         </div>
 
         {/* Order ID + Total card */}
@@ -84,15 +106,47 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
               <p className="text-2xl font-semibold tabular-nums text-ink">
                 {total ? formatPrice(total) : "—"}
               </p>
-              <p className="text-xs text-emerald-600 mt-1 inline-flex items-center justify-end gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Lunas via Xendit
-              </p>
+              {!isCancelled && (
+                <p className="text-xs text-emerald-600 mt-1 inline-flex items-center justify-end gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Lunas via Xendit
+                </p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Status timeline */}
+        {/* Status timeline OR cancelled banner */}
+        {isCancelled ? (
+          <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-red-50 ring-4 ring-red-100/60 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-ink">Pesanan dibatalkan</p>
+                <p className="text-sm text-muted mt-1">
+                  Stok telah dikembalikan ke katalog. Jika kamu sudah membayar, dana akan
+                  direfund sesuai kebijakan.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button asChild variant="outline" size="sm" className="rounded-full border-hairline">
+                    <Link href="/store/catalog">
+                      <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
+                      Belanja lagi
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="rounded-full">
+                    <Link href="/kontak">
+                      <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                      Hubungi CS
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
           <h2 className="font-semibold text-lg mb-1">Status pesanan</h2>
           <p className="text-xs text-muted mb-5">
@@ -141,6 +195,50 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
             })}
           </ol>
         </div>
+        )}
+
+        {order?.guest_tracking_token && (
+          <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-emerald-50 ring-4 ring-emerald-100/60 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-ink">Simpan link pelacakan</p>
+                <p className="text-xs text-muted mt-0.5">
+                  Kami juga kirim link ini ke email kamu. Tanpa akun, link inilah cara cepat
+                  cek status pesanan.
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={
+                      typeof window !== "undefined"
+                        ? `${window.location.origin}${trackerHref}`
+                        : trackerHref
+                    }
+                    className="flex-1 h-9 rounded-lg border border-hairline bg-surface-soft px-3 text-xs font-mono text-ink/80 select-all"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 rounded-full border-hairline"
+                    onClick={() =>
+                      copyToClipboard(
+                        typeof window !== "undefined"
+                          ? `${window.location.origin}${trackerHref}`
+                          : trackerHref,
+                      )
+                    }
+                  >
+                    <Copy className="w-3.5 h-3.5 mr-1.5" />
+                    Salin
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Next steps */}
         <div className="rounded-2xl border border-hairline bg-surface-soft p-6 mb-6">
@@ -150,7 +248,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
               icon={Package}
               title="Lacak pesanan"
               description="Pantau status & estimasi tiba."
-              href="/store/tracker"
+              href={trackerHref}
             />
             <NextStepCard
               icon={MapPin}
@@ -173,7 +271,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
             <Link href="/store/catalog">Lanjut belanja</Link>
           </Button>
           <Button className="flex-1 rounded-full h-12" asChild>
-            <Link href="/store/tracker">
+            <Link href={trackerHref}>
               Lacak pesanan
               <ArrowRight className="h-4 w-4 ml-2" />
             </Link>

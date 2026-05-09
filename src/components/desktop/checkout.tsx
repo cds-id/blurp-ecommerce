@@ -16,15 +16,8 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
-import { cities } from "@/src/data/shipping";
 import { cn, formatPrice } from "@/src/lib/utils";
+import { LocationPicker, type LocationPickerValue } from "@/src/components/shared/location-picker";
 import { useCart } from "@/src/components/shared/cart-provider";
 import { SafeImage } from "@/src/components/shared/safe-image";
 import { saveLastOrder } from "@/src/data/mock-orders";
@@ -53,14 +46,18 @@ export function DesktopCheckout() {
   const cart = useCart();
   const { isAuthenticated } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedCity, setSelectedCity] = useState("");
   const [selectedShipping, setSelectedShipping] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [location, setLocation] = useState<LocationPickerValue>({
+    district_id: null,
+    province: "",
+    city: "",
+    district: "",
+    postal_code: "",
+  });
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [shippingChoices, setShippingChoices] = useState<ShippingOption[]>([]);
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
@@ -75,15 +72,15 @@ export function DesktopCheckout() {
   const total = subtotal + shippingCost;
 
   const canProceed = () => {
-    if (step === 1) return Boolean(name && phone && email && address && selectedCity && districtId);
+    if (step === 1)
+      return Boolean(name && phone && email && address && location.district_id);
     if (step === 2) return Boolean(selectedShipping);
     if (step === 3) return true;
     return false;
   };
 
   const loadShippingOptions = async () => {
-    const cityObj = cities.find((c) => c.id === selectedCity);
-    if (!cityObj || !districtId) return;
+    if (!location.district_id) return;
     setIsLoadingShipping(true);
     setShippingError(null);
     try {
@@ -95,11 +92,11 @@ export function DesktopCheckout() {
             email,
             phone: normalizePhone(phone),
             street: address,
-            city: cityObj.name,
-            province: cityObj.province,
-            postal_code: postalCode || "00000",
+            city: location.city,
+            province: location.province,
+            postal_code: location.postal_code || "00000",
             country: "ID",
-            district_id: districtId,
+            district_id: location.district_id,
           },
         });
         setShippingChoices(quote.shipping_options);
@@ -114,7 +111,7 @@ export function DesktopCheckout() {
 
         const res = await shippingApi.shippingCost({
           origin_district_id: cfg.origin_district_id,
-          destination_district_id: districtId,
+          destination_district_id: location.district_id,
           weight_grams: weight,
           couriers: ["jne", "jnt", "sicepat"],
         });
@@ -154,8 +151,7 @@ export function DesktopCheckout() {
     }
 
     // step 3
-    const cityObj = cities.find((c) => c.id === selectedCity) ?? null;
-    if (!cityObj || !districtId || !shippingOpt) return;
+    if (!location.district_id || !shippingOpt) return;
 
     setIsPlacingOrder(true);
     try {
@@ -165,11 +161,11 @@ export function DesktopCheckout() {
           email,
           phone: normalizePhone(phone),
           street: address,
-          city: cityObj.name,
-          province: cityObj.province,
-          postal_code: postalCode || "00000",
+          city: location.city,
+          province: location.province,
+          postal_code: location.postal_code || "00000",
           country: "ID",
-          district_id: districtId,
+          district_id: location.district_id,
         },
         courier_code: shippingOpt.courier_code,
         service_code: shippingOpt.service_code,
@@ -181,6 +177,7 @@ export function DesktopCheckout() {
         createdAt: new Date().toISOString(),
         total: order.total_idr ?? total,
         status: "paid",
+        guest_tracking_token: order.guest_tracking_token,
       });
       await cart.clear();
 
@@ -222,9 +219,6 @@ export function DesktopCheckout() {
       </div>
     );
   }
-
-  const cityName = (id: string) => cities.find((c) => c.id === id)?.name ?? "";
-  const provinceName = (id: string) => cities.find((c) => c.id === id)?.province ?? "";
 
   return (
     <div className="bg-background min-h-screen">
@@ -357,43 +351,18 @@ export function DesktopCheckout() {
                       placeholder="kamu@email.com"
                     />
                   </Field>
-                  <Field label="Kota" required>
-                    <Select value={selectedCity} onValueChange={setSelectedCity}>
-                      <SelectTrigger className="h-11 rounded-xl border-hairline">
-                        <SelectValue placeholder="Pilih kota..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((city) => (
-                          <SelectItem key={city.id} value={city.id}>
-                            {city.name}, {city.province}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                  <Field label="Kode pos" helper="Opsional (akan diganti dari location search)">
+                  <div className="col-span-2">
+                    <LocationPicker value={location} onChange={setLocation} />
+                  </div>
+                  <Field label="Kode pos" helper="Terisi otomatis dari pilihan lokasi (boleh diubah).">
                     <Input
                       className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
                       placeholder="40123"
                       inputMode="numeric"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                    />
-                  </Field>
-                  <Field
-                    label="District ID"
-                    required
-                    helper="Backend checkout butuh district_id. Sementara isi manual (akan diganti location search)."
-                  >
-                    <Input
-                      className="h-11 rounded-xl border-hairline focus-visible:ring-ink"
-                      placeholder="contoh: 1234"
-                      inputMode="numeric"
-                      value={districtId ? String(districtId) : ""}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        setDistrictId(Number.isFinite(n) && n > 0 ? n : null);
-                      }}
+                      value={location.postal_code}
+                      onChange={(e) =>
+                        setLocation((v) => ({ ...v, postal_code: e.target.value }))
+                      }
                     />
                   </Field>
                   <Field label="Alamat lengkap" required className="col-span-2">
@@ -416,7 +385,7 @@ export function DesktopCheckout() {
                     Pilih pengiriman
                   </h2>
                   <p className="text-sm text-muted mt-1">
-                    Estimasi sampai untuk {cityName(selectedCity) || "kota tujuan"}.
+                    Estimasi sampai untuk {location.city || "kota tujuan"}.
                   </p>
                 </header>
 
@@ -518,7 +487,7 @@ export function DesktopCheckout() {
                     </p>
                     <p className="text-xs text-muted mt-1">
                       {address || "—"}
-                      {selectedCity && `, ${cityName(selectedCity)}, ${provinceName(selectedCity)}`}
+                      {location.city && `, ${location.city}, ${location.province}`}
                     </p>
                   </div>
                 </div>
