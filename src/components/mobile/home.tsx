@@ -60,7 +60,7 @@ export function MobileHome({
         {/* Content */}
         <div className="relative px-5 pt-20 pb-10">
           {/* Badge */}
-          <Badge className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/20 mb-4 px-3 py-1.5">
+          <Badge className="hero-chip hover:bg-white/20 mb-4 px-3 py-1.5">
             <Sparkles className="w-3 h-3 mr-1.5 inline" />
             KOLEKSI TERBARU 2026
           </Badge>
@@ -69,9 +69,7 @@ export function MobileHome({
           <h1 className="text-4xl font-bold text-white mb-4 leading-tight animate-slide-up">
             Belanja Cepat,
             <br />
-            <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-              Tanpa Ribet Daftar
-            </span>
+            <span className="font-semibold text-white/90">Tanpa Ribet Daftar</span>
           </h1>
 
           {/* Subtitle */}
@@ -91,24 +89,20 @@ export function MobileHome({
             </Button>
           </Link>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-8 animate-slide-up stagger-3">
-            <div className="border-l-2 border-white/30 pl-3">
-              <div className="text-2xl font-bold text-white">50K+</div>
-              <div className="text-xs text-white/60 uppercase">Produk</div>
-            </div>
-            <div className="border-l-2 border-white/30 pl-3">
-              <div className="text-2xl font-bold text-white">10K+</div>
-              <div className="text-xs text-white/60 uppercase">Penjual</div>
-            </div>
-            <div className="border-l-2 border-white/30 pl-3">
-              <div className="flex items-center gap-1">
-                <div className="text-2xl font-bold text-white">4.9</div>
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <div className="text-xs text-white/60 uppercase">Rating</div>
-            </div>
-          </div>
+          <ul className="flex flex-col gap-2 mt-8 animate-slide-up stagger-3" aria-label="Keunggulan belanja">
+            {[
+              { icon: Truck, label: "Pengiriman ke seluruh Indonesia" },
+              { icon: Shield, label: "Checkout tanpa daftar" },
+            ].map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-2 text-sm text-white/90 w-fit"
+              >
+                <Icon className="h-4 w-4 shrink-0 text-white" aria-hidden />
+                {label}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Bottom Wave */}
@@ -116,14 +110,14 @@ export function MobileHome({
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path
               d="M0 80L60 73.3C120 66.7 240 53.3 360 46.7C480 40 600 40 720 43.3C840 46.7 960 53.3 1080 56.7C1200 60 1320 60 1380 60L1440 60V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z"
-              fill="#ffffff"
+              fill="var(--color-canvas)"
             />
           </svg>
         </div>
       </section>
 
       {/* Shop by Routine */}
-      <section className="px-4 py-6 bg-white">
+      <section className="px-4 py-6 bg-canvas">
         <div className="flex items-end justify-between mb-4">
           <div>
             <h2 className="font-bold text-lg text-ink">Shop by Routine</h2>
@@ -151,7 +145,7 @@ export function MobileHome({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <div className="text-[10px] uppercase tracking-wider text-white/85">{card.subtitle}</div>
+                <div className="text-micro uppercase tracking-wider text-white/85">{card.subtitle}</div>
                 <div className="text-white text-xl font-semibold mt-1">{card.title}</div>
               </div>
             </Link>
@@ -193,7 +187,7 @@ export function MobileHome({
       </section>
 
       {/* Best Sellers */}
-      <section className="px-4 py-6 bg-white">
+      <section className="px-4 py-6 bg-canvas">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-bold text-lg text-ink">Best Sellers</h2>
@@ -240,7 +234,7 @@ export function MobileHome({
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-end p-5">
-            <Badge className="w-fit mb-2 bg-white text-ink text-[10px] font-bold px-3 py-1.5">
+            <Badge className="w-fit mb-2 bg-white text-ink text-micro font-bold px-3 py-1.5">
               NEW
             </Badge>
             <h3 className="text-xl font-bold text-white mb-1">Glow Essentials</h3>
@@ -264,7 +258,7 @@ export function MobileHome({
       </section>
 
       {/* Ingredients Spotlight */}
-      <section className="px-4 py-6 bg-white">
+      <section className="px-4 py-6 bg-canvas">
         <div className="mb-4">
           <h2 className="font-bold text-lg text-ink">Ingredients</h2>
           <p className="text-xs text-muted">Pilih formula sesuai kebutuhan kulit</p>
@@ -310,11 +304,11 @@ export function MobileHome({
         </div>
         <div className="space-y-3">
           {reviews.map((r) => (
-            <div key={r.name} className="rounded-2xl border border-hairline bg-white p-4 shadow-sm">
+            <div key={r.name} className="rounded-2xl border border-hairline bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold text-ink text-sm">{r.name}</div>
-                  <div className="text-[11px] text-muted">{r.tag}</div>
+                  <div className="text-caption-2xs text-muted">{r.tag}</div>
                 </div>
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: r.rating }).map((_, i) => (
@@ -329,7 +323,7 @@ export function MobileHome({
       </section>
 
       {/* Seasonal Offers */}
-      <section className="px-4 py-6 bg-white">
+      <section className="px-4 py-6 bg-canvas">
         <Link 
           href="/store/catalog?promo=flash"
           className="group relative rounded-2xl overflow-hidden h-48 block"

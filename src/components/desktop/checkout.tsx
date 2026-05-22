@@ -210,7 +210,7 @@ export function DesktopCheckout() {
 
   if (cart.isHydrated && items.length === 0) {
     return (
-      <div className="container mx-auto px-6 py-20 text-center">
+      <div className="store-container py-20 text-center">
         <h1 className="text-2xl font-semibold mb-2">Checkout</h1>
         <p className="text-muted mb-6">Keranjang kamu masih kosong.</p>
         <Button asChild size="lg" className="rounded-full px-6">
@@ -222,7 +222,7 @@ export function DesktopCheckout() {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="container mx-auto px-6 pt-6">
+      <div className="store-container pt-6">
         <nav className="flex items-center text-sm text-muted">
           <Link href="/" className="hover:text-ink transition-colors">Beranda</Link>
           <ChevronRight className="h-4 w-4 mx-2" />
@@ -232,7 +232,7 @@ export function DesktopCheckout() {
         </nav>
       </div>
 
-      <div className="container mx-auto px-6 pt-4 pb-12">
+      <div className="store-container pt-4 pb-12">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Checkout</h1>
@@ -250,7 +250,7 @@ export function DesktopCheckout() {
         </div>
 
         {/* Step header */}
-        <div className="rounded-2xl border border-hairline bg-white p-4 mb-6">
+        <div className="rounded-2xl border border-hairline bg-card p-4 mb-6">
           <ol className="grid grid-cols-3 gap-2">
             {STEPS.map((s, idx) => {
               const isDone = step > s.num;
@@ -275,7 +275,7 @@ export function DesktopCheckout() {
                   <div className="min-w-0 flex-1">
                     <div
                       className={cn(
-                        "text-[11px] uppercase tracking-wider",
+                        "text-caption-2xs uppercase tracking-wider",
                         isCurrent ? "text-primary" : "text-muted"
                       )}
                     >
@@ -308,7 +308,7 @@ export function DesktopCheckout() {
           {/* Main Form */}
           <div className="space-y-6">
             {step === 1 && (
-              <section className="rounded-2xl border border-hairline bg-white">
+              <section className="rounded-2xl border border-hairline bg-card">
                 <header className="p-6 border-b border-hairline">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
@@ -378,7 +378,7 @@ export function DesktopCheckout() {
             )}
 
             {step === 2 && (
-              <section className="rounded-2xl border border-hairline bg-white">
+              <section className="rounded-2xl border border-hairline bg-card">
                 <header className="p-6 border-b border-hairline">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
                     <Truck className="h-5 w-5" />
@@ -439,7 +439,7 @@ export function DesktopCheckout() {
             )}
 
             {step === 3 && (
-              <section className="rounded-2xl border border-hairline bg-white">
+              <section className="rounded-2xl border border-hairline bg-card">
                 <header className="p-6 border-b border-hairline">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
@@ -461,7 +461,7 @@ export function DesktopCheckout() {
                         Kartu kredit, virtual account, e-wallet, & QRIS.
                       </p>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider font-bold bg-ink text-white px-2 py-1 rounded-full">
+                    <span className="text-micro uppercase tracking-wider font-bold bg-ink text-white px-2 py-1 rounded-full">
                       Direkomendasikan
                     </span>
                   </div>
@@ -479,7 +479,7 @@ export function DesktopCheckout() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-hairline bg-white p-4">
+                  <div className="rounded-2xl border border-hairline bg-card p-4">
                     <p className="text-xs uppercase tracking-wider text-muted mb-2">Kirim ke</p>
                     <p className="text-sm font-medium text-ink">{name || "—"}</p>
                     <p className="text-xs text-muted">
@@ -527,7 +527,7 @@ export function DesktopCheckout() {
 
           {/* Order Summary */}
           <aside className="h-fit sticky top-24 space-y-4">
-            <div className="rounded-2xl border border-hairline bg-white overflow-hidden">
+            <div className="rounded-2xl border border-hairline bg-card overflow-hidden">
               <header className="p-5 border-b border-hairline">
                 <h2 className="font-semibold text-base">Ringkasan pesanan</h2>
                 <p className="text-xs text-muted mt-0.5">{totalUnits} barang</p>
@@ -553,7 +553,7 @@ export function DesktopCheckout() {
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                        <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-ink text-white text-micro font-bold flex items-center justify-center">
                           {item.quantity}
                         </span>
                       </div>

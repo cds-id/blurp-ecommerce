@@ -63,7 +63,7 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white border-b border-hairline">
+      <header className="sticky top-0 z-50 w-full bg-canvas border-b border-hairline">
         <div className="flex h-14 items-center justify-between px-4">
           <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(true)} aria-label="Buka menu">
             <Menu className="h-5 w-5" />
@@ -101,9 +101,11 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
 
       {/* Search Overlay */}
       {isSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-white">
+        <div className="fixed inset-0 z-50 bg-canvas">
           <div className="flex items-center gap-3 p-4 border-b border-hairline">
             <button
+              type="button"
+              className="h-11 w-11 flex items-center justify-center shrink-0 rounded-full"
               onClick={() => {
                 setIsSearchOpen(false);
                 setSearchQuery("");
@@ -114,10 +116,11 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
             </button>
             <Input
               type="search"
+              aria-label="Cari produk"
               placeholder="Cari produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 border-0 bg-transparent focus:ring-0"
+              className="flex-1 border-0 bg-transparent focus-visible:ring-2 focus-visible:ring-ring"
               autoFocus
             />
             <button
@@ -238,7 +241,7 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                       <div className="absolute bottom-3 left-4 text-white">
-                        <div className="text-[11px] uppercase tracking-wider opacity-80">Explore</div>
+                        <div className="text-caption-2xs uppercase tracking-wider opacity-80">Explore</div>
                         <div className="text-xl font-semibold">{activeCategoryDef.label}</div>
                         <div className="text-xs opacity-90 mt-0.5">{activeCategoryDef.description}</div>
                       </div>
@@ -270,7 +273,7 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
                 </div>
               ) : (
                 <nav className="p-3">
-                  <p className="px-2 pt-1 pb-2 text-[11px] uppercase tracking-wider text-muted">
+                  <p className="px-2 pt-1 pb-2 text-caption-2xs uppercase tracking-wider text-muted">
                     Kategori
                   </p>
                   <div className="grid gap-0.5">
@@ -291,7 +294,7 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
 
                   <div className="border-t border-hairline my-3" />
 
-                  <p className="px-2 pt-1 pb-2 text-[11px] uppercase tracking-wider text-muted">
+                  <p className="px-2 pt-1 pb-2 text-caption-2xs uppercase tracking-wider text-muted">
                     Untuk kamu
                   </p>
                   <div className="grid gap-0.5">
@@ -301,7 +304,7 @@ export function MobileNavbar({ title }: MobileNavbarProps) {
                       onClick={closeMenu}
                     >
                       <span>Semua produk</span>
-                      <span className="ml-auto text-[10px] font-bold tracking-wider uppercase text-muted">
+                      <span className="ml-auto text-micro font-bold tracking-wider uppercase text-muted">
                         NEW
                       </span>
                     </Link>

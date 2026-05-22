@@ -95,7 +95,7 @@ export function MobileCatalog({
       <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 min-h-11">
               <SlidersHorizontal className="h-4 w-4" />
               Filter
               {activeFilterCount > 0 && (
@@ -112,7 +112,7 @@ export function MobileCatalog({
             
             <div className="py-6 space-y-6">
               <div>
-                <h4 className="font-medium mb-3">Kategori</h4>
+                <p className="font-medium mb-3 text-sm">Kategori</p>
                 <div className="space-y-2">
                   {categories.map((cat) => (
                     <label
@@ -141,14 +141,14 @@ export function MobileCatalog({
               <Separator />
 
               <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
-                <h4 className="font-medium mb-3">Ukuran</h4>
+                <p className="font-medium mb-3 text-sm">Ukuran</p>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => (
                     <Button
                       key={size}
                       variant={selectedSize === size ? "secondary" : "outline"}
                       size="sm"
-                      className="h-8 w-10"
+                      className="h-10 min-w-10"
                       onClick={() => {
                         const next = new URLSearchParams(sp);
                         if (selectedSize === size) next.delete("size");
@@ -169,7 +169,7 @@ export function MobileCatalog({
               <Separator />
 
               <div className={filtersDisabled ? "opacity-50 pointer-events-none" : ""}>
-                <h4 className="font-medium mb-3">Harga</h4>
+                <p className="font-medium mb-3 text-sm">Harga</p>
                 <div className="space-y-2 text-sm">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <Checkbox
@@ -274,7 +274,7 @@ export function MobileCatalog({
             router.push(`${pathname}?${next.toString()}`);
           }}
         >
-          <SelectTrigger className="w-[130px] h-9">
+          <SelectTrigger className="w-[130px] h-10 min-h-11">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -295,7 +295,7 @@ export function MobileCatalog({
               key={[...categorySet].join(",")}
               variant="secondary"
               size="sm"
-              className="h-7 gap-1 text-xs"
+              className="h-10 gap-1.5 text-xs min-h-11"
               onClick={() => {
                 const next = new URLSearchParams(sp);
                 next.delete("category");
@@ -312,7 +312,7 @@ export function MobileCatalog({
               key={`size:${selectedSize}`}
               variant="secondary"
               size="sm"
-              className="h-7 gap-1 text-xs"
+              className="h-10 gap-1.5 text-xs min-h-11"
               onClick={() => {
                 const next = new URLSearchParams(sp);
                 next.delete("size");
@@ -330,7 +330,7 @@ export function MobileCatalog({
               key={`price:${minPrice}-${maxPrice}`}
               variant="secondary"
               size="sm"
-              className="h-7 gap-1 text-xs"
+              className="h-10 gap-1.5 text-xs min-h-11"
               onClick={() => {
                 const next = new URLSearchParams(sp);
                 next.delete("min_price_idr");

@@ -222,7 +222,7 @@ export function MobileCheckout() {
   return (
     <div className="bg-background pb-44">
       {/* Progress header */}
-      <div className="bg-white border-b border-hairline px-4 pt-3 pb-4">
+      <div className="bg-card border-b border-hairline px-4 pt-3 pb-4">
         <div className="flex items-center gap-2 mb-3">
           {step > 1 ? (
             <button
@@ -255,7 +255,7 @@ export function MobileCheckout() {
                   )}
                 />
                 {idx === STEPS.length - 1 && (
-                  <span className="text-[10px] font-semibold text-muted tabular-nums">
+                  <span className="text-micro font-semibold text-muted tabular-nums">
                     {step}/3
                   </span>
                 )}
@@ -267,7 +267,7 @@ export function MobileCheckout() {
 
       <div className="p-4 space-y-4">
         {step === 1 && (
-          <section className="rounded-2xl border border-hairline bg-white p-4 space-y-3">
+          <section className="rounded-2xl border border-hairline bg-card p-4 space-y-3">
             <header className="pb-1">
               <h2 className="font-semibold text-ink flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -328,7 +328,7 @@ export function MobileCheckout() {
         )}
 
         {step === 2 && (
-          <section className="rounded-2xl border border-hairline bg-white p-4">
+          <section className="rounded-2xl border border-hairline bg-card p-4">
             <header className="pb-3">
               <h2 className="font-semibold text-ink flex items-center gap-2">
                 <Truck className="h-4 w-4" />
@@ -366,7 +366,7 @@ export function MobileCheckout() {
                             <p className="font-medium text-sm text-ink">
                               {opt.courier_name} · {opt.service_code}
                             </p>
-                            <p className="text-[11px] text-muted truncate">
+                            <p className="text-caption-2xs text-muted truncate">
                               {opt.service_name} · {opt.etd}
                             </p>
                           </div>
@@ -392,15 +392,15 @@ export function MobileCheckout() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-ink">Bayar via Xendit</p>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-caption-2xs text-muted">
                     VA, e-wallet, kartu, & QRIS.
                   </p>
                 </div>
               </div>
             </section>
 
-            <section className="rounded-2xl border border-hairline bg-white p-4 text-sm">
-              <p className="text-[11px] uppercase tracking-wider text-muted mb-1">Kirim ke</p>
+            <section className="rounded-2xl border border-hairline bg-card p-4 text-sm">
+              <p className="text-caption-2xs uppercase tracking-wider text-muted mb-1">Kirim ke</p>
               <p className="font-medium text-ink">{name || "—"}</p>
               <p className="text-xs text-muted">
                 {phone || "—"} • {email || "—"}
@@ -430,7 +430,7 @@ export function MobileCheckout() {
       </div>
 
       {/* Sticky bottom action bar with collapsible summary */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-hairline z-40 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-hairline z-40 shadow-sticky-bar">
         {showSummary && (
           <div className="px-4 py-3 border-b border-hairline max-h-72 overflow-y-auto">
             {isSummaryLoading ? (
@@ -458,7 +458,7 @@ export function MobileCheckout() {
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-ink text-white text-micro font-bold flex items-center justify-center">
                           {item.quantity}
                         </span>
                       </div>
@@ -466,7 +466,7 @@ export function MobileCheckout() {
                         <p className="text-xs font-medium text-ink line-clamp-1">
                           {item.product_name ?? "Produk"}
                         </p>
-                        <p className="text-[11px] text-muted line-clamp-1">
+                        <p className="text-caption-2xs text-muted line-clamp-1">
                           {item.variant_name || "—"}
                         </p>
                       </div>
@@ -554,7 +554,7 @@ function Field({
         {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
       {children}
-      {helper && <p className="text-[11px] text-muted">{helper}</p>}
+      {helper && <p className="text-caption-2xs text-muted">{helper}</p>}
     </div>
   );
 }

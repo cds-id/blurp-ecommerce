@@ -1,11 +1,7 @@
-"use client";
-
-import { useIsDesktop } from "@/src/hooks";
 import { DesktopCart } from "@/src/components/desktop";
 import { MobileCart } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 
 export default function KeranjangPage() {
-  const isDesktop = useIsDesktop();
-
-  return isDesktop ? <DesktopCart /> : <MobileCart />;
+  return <ResponsiveSplit desktop={<DesktopCart />} mobile={<MobileCart />} />;
 }

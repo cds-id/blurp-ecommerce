@@ -26,6 +26,14 @@
   --color-star-rating: #222222;
   --color-scrim: #000000;
 
+  /* Admin backoffice palette */
+  --color-admin-ink: #2a2520;
+  --color-admin-canvas: #f0eee9;
+  --color-admin-sidebar: #f3efe7;
+  --color-admin-muted: #5b544c;
+  --color-admin-hover: #f3e4dc;
+  --color-admin-on-dark: #fbf9f4;
+
   /* Surface colors mapped to Tailwind */
   --color-background: var(--color-canvas);
   --color-foreground: var(--color-ink);
@@ -61,6 +69,68 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-ink: #f2f2f2;
+    --color-body: #d4d4d4;
+    --color-muted: #a3a3a3;
+    --color-muted-soft: #737373;
+    --color-hairline: #3a3a3a;
+    --color-hairline-soft: #2e2e2e;
+    --color-border-strong: #525252;
+    --color-canvas: #141414;
+    --color-surface-soft: #1c1c1c;
+    --color-surface-card: #1a1a1a;
+    --color-surface-strong: #242424;
+    --color-star-rating: #f2f2f2;
+    --color-background: var(--color-canvas);
+    --color-foreground: var(--color-ink);
+    --color-card: var(--color-surface-card);
+    --color-card-foreground: var(--color-ink);
+    --color-popover: var(--color-surface-card);
+    --color-popover-foreground: var(--color-ink);
+    --color-secondary: var(--color-surface-soft);
+    --color-secondary-foreground: var(--color-ink);
+    --color-muted-foreground: var(--color-muted);
+    --color-border: var(--color-hairline);
+    --color-input: var(--color-hairline);
+    --color-admin-ink: #f0ebe4;
+    --color-admin-canvas: #121110;
+    --color-admin-sidebar: #1a1816;
+    --color-admin-muted: #9a9288;
+    --color-admin-hover: #2a2622;
+    --color-admin-on-dark: #1a1816;
+    color-scheme: dark;
+  }
+}
+
+/* Hero overlays on photography (no glass blur) */
+.hero-chip {
+  background-color: color-mix(in srgb, var(--color-on-dark) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-on-dark) 22%, transparent);
+  color: var(--color-on-dark);
+}
+
+.login-panel {
+  border-radius: 1.5rem;
+  border: 1px solid var(--color-hairline);
+  background-color: var(--color-card);
+  box-shadow:
+    rgba(0, 0, 0, 0.02) 0 0 0 1px,
+    rgba(0, 0, 0, 0.06) 0 8px 24px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Airbnb Typography */
 .font-display-xl { font-size: 28px; font-weight: 700; line-height: 1.43; letter-spacing: 0; }
 .font-display-lg { font-size: 22px; font-weight: 500; line-height: 1.18; letter-spacing: -0.44px; }
@@ -82,6 +152,37 @@ body {
 /* Airbnb Shadows */
 .shadow-card-hover {
   box-shadow: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0, rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+}
+
+.shadow-sticky-bar {
+  box-shadow: 0 -8px 24px -12px color-mix(in srgb, var(--color-scrim) 8%, transparent);
+}
+
+/* Type scale aliases (prefer over arbitrary text-[Npx]) */
+.text-micro {
+  font-size: 10px;
+  line-height: 1.25;
+}
+.text-caption-2xs {
+  font-size: 11px;
+  line-height: 1.23;
+}
+.text-nano {
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+/* Storefront content width on large screens */
+.store-container {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: 1.5rem;
+}
+@media (min-width: 1280px) {
+  .store-container {
+    max-width: 90rem;
+  }
 }
 
 /* Airbnb Animations */

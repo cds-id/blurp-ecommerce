@@ -121,7 +121,7 @@ function WishlistView() {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full text-ink/70 hover:text-ink hidden sm:inline-flex"
+              className="rounded-full text-ink/70 hover:text-ink hidden md:inline-flex"
               onClick={handleClear}
             >
               <Trash2 className="w-3.5 h-3.5 mr-1.5" />

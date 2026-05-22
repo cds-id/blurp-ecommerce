@@ -1,11 +1,7 @@
-"use client";
-
-import { useIsDesktop } from "@/src/hooks";
 import { DesktopCheckout } from "@/src/components/desktop";
 import { MobileCheckout } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 
 export default function CheckoutPage() {
-  const isDesktop = useIsDesktop();
-
-  return isDesktop ? <DesktopCheckout /> : <MobileCheckout />;
+  return <ResponsiveSplit desktop={<DesktopCheckout />} mobile={<MobileCheckout />} />;
 }

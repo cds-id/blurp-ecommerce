@@ -1,5 +1,6 @@
 import { DesktopCatalog } from "@/src/components/desktop";
 import { MobileCatalog } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 import { listCatalogCategories, listCatalogProducts } from "@/src/lib/catalog/server";
 import { toUiCategories, toUiProduct } from "@/src/lib/catalog/adapters";
 
@@ -48,8 +49,8 @@ export default async function CatalogPage({
   const uiProducts = items.map((p) => toUiProduct(p, categoryById));
 
   return (
-    <>
-      <div className="hidden md:block">
+    <ResponsiveSplit
+      desktop={
         <DesktopCatalog
           categories={uiCats}
           products={uiProducts}
@@ -58,8 +59,8 @@ export default async function CatalogPage({
           meta={meta}
           searchQuery={q}
         />
-      </div>
-      <div className="md:hidden">
+      }
+      mobile={
         <MobileCatalog
           categories={uiCats}
           products={uiProducts}
@@ -68,7 +69,7 @@ export default async function CatalogPage({
           meta={meta}
           searchQuery={q}
         />
-      </div>
-    </>
+      }
+    />
   );
 }

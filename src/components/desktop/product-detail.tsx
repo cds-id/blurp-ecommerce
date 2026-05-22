@@ -91,7 +91,7 @@ export function DesktopProductDetail({ product, defaultVariantId }: DesktopProdu
   return (
     <div className="bg-canvas min-h-screen">
       {/* Breadcrumb */}
-      <div className="container mx-auto px-6 py-4">
+      <div className="store-container py-4">
         <nav className="flex items-center text-sm text-muted">
           <Link href="/" className="hover:text-ink transition-colors">Beranda</Link>
           <ChevronRight className="h-4 w-4 mx-2" />
@@ -105,7 +105,7 @@ export function DesktopProductDetail({ product, defaultVariantId }: DesktopProdu
         </nav>
       </div>
 
-      <div className="container mx-auto px-6 pb-16">
+      <div className="store-container pb-16">
         <div className="grid grid-cols-2 gap-12">
           {/* Image Gallery - Airbnb Style */}
           <div className="space-y-4">
@@ -148,7 +148,7 @@ export function DesktopProductDetail({ product, defaultVariantId }: DesktopProdu
               <div className="flex items-start justify-between">
                 <div>
                   {product.isNew && (
-                    <Badge className="mb-2 bg-surface-soft text-ink font-bold text-[10px] uppercase tracking-wide">
+                    <Badge className="mb-2 bg-surface-soft text-ink font-bold text-micro uppercase tracking-wide">
                       BARU
                     </Badge>
                   )}
@@ -182,7 +182,7 @@ export function DesktopProductDetail({ product, defaultVariantId }: DesktopProdu
                     <span className="text-base text-muted line-through">
                       {formatPrice(product.originalPrice)}
                     </span>
-                    <Badge className="bg-primary text-white font-bold text-[10px] uppercase tracking-wide">
+                    <Badge className="bg-primary text-white font-bold text-micro uppercase tracking-wide">
                       -{discount}%
                     </Badge>
                   </>
@@ -210,15 +210,17 @@ export function DesktopProductDetail({ product, defaultVariantId }: DesktopProdu
                   {product.colors.map((color) => (
                     <button
                       key={color.name}
+                      type="button"
+                      aria-label={`Warna ${color.name}`}
+                      aria-pressed={selectedColor === color.name}
                       className={cn(
-                        "h-12 w-12 rounded-full border-2 transition-all hover:scale-110",
+                        "h-12 w-12 rounded-full border-2 transition-all hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                         selectedColor === color.name
                           ? "border-ink ring-2 ring-ink/20 scale-110"
                           : "border-hairline hover:border-ink"
                       )}
                       style={{ backgroundColor: color.value }}
                       onClick={() => setSelectedColor(color.name)}
-                      title={color.name}
                     />
                   ))}
                 </div>

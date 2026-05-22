@@ -133,7 +133,7 @@ function AddressesView() {
                         {a.label || a.name}
                       </p>
                       {a.is_default && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-micro font-semibold uppercase tracking-wider px-2 py-0.5">
                           <Star className="w-3 h-3" />
                           Default
                         </span>

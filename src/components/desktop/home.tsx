@@ -107,21 +107,21 @@ export function DesktopHome({
         </div>
 
         {/* Content */}
-        <div className="relative container mx-auto px-6 py-18 lg:py-24">
+        <div className="relative store-container py-18 lg:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-6 max-w-none">
             {/* Badge with Icon */}
             <div className="animate-fade-in mb-6">
-              <Badge className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/20 px-4 py-2 text-sm">
+              <Badge className="hero-chip hover:bg-white/20 px-4 py-2 text-sm">
                 <Sparkles className="w-4 h-4 mr-2 inline" />
                 KOLEKSI TERBARU 2026
               </Badge>
             </div>
 
             {/* Main Headline - Better Typography */}
-            <h1 className="text-5xl md:text-6xl lg:text-[64px] xl:text-[68px] font-bold text-white mb-6 leading-[1.05] tracking-tight animate-slide-up text-balance">
+            <h1 className="text-5xl md:text-6xl lg:text-[64px] xl:text-[68px] font-bold text-white mb-6 leading-[1.05] tracking-tight animate-slide-up text-balance max-w-3xl">
               <span className="whitespace-nowrap">Belanja Cepat,</span>{" "}
-              <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent whitespace-nowrap">
+              <span className="whitespace-nowrap font-semibold text-white/90">
                 Tanpa Ribet Daftar
               </span>
             </h1>
@@ -144,30 +144,27 @@ export function DesktopHome({
                 </Button>
               </Link>
               <Link href="/store/catalog">
-                <Button variant="outline" size="lg" className="border-2 border-white/60 text-white bg-transparent hover:bg-white/15 hover:text-white hover:border-white font-semibold rounded-lg px-10 h-16 text-lg backdrop-blur-sm">
+                <Button variant="outline" size="lg" className="border-2 border-white/60 text-white bg-transparent hover:bg-white/15 hover:text-white hover:border-white font-semibold rounded-lg px-10 h-16 text-lg">
                   Lihat Katalog
                 </Button>
               </Link>
             </div>
 
-            {/* Stats - Better Layout */}
-            <div className="grid grid-cols-3 gap-8 animate-slide-up stagger-3">
-              <div className="border-l-4 border-white/30 pl-4">
-                <div className="text-4xl font-bold text-white mb-1">50K+</div>
-                <div className="text-sm text-white/60 uppercase tracking-wide">Produk Tersedia</div>
-              </div>
-              <div className="border-l-4 border-white/30 pl-4">
-                <div className="text-4xl font-bold text-white mb-1">10K+</div>
-                <div className="text-sm text-white/60 uppercase tracking-wide">Penjual Terpercaya</div>
-              </div>
-              <div className="border-l-4 border-white/30 pl-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="text-4xl font-bold text-white">4.9</div>
-                  <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
-                </div>
-                <div className="text-sm text-white/60 uppercase tracking-wide">Rating Pengguna</div>
-              </div>
-            </div>
+            <ul className="flex flex-wrap gap-3 animate-slide-up stagger-3" aria-label="Keunggulan belanja">
+              {[
+                { icon: Truck, label: "Pengiriman ke seluruh Indonesia" },
+                { icon: Shield, label: "Checkout tanpa daftar" },
+                { icon: RotateCcw, label: "Garansi kepuasan" },
+              ].map(({ icon: Icon, label }) => (
+                <li
+                  key={label}
+                  className="flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-4 py-2.5 text-sm text-white/90"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-white" aria-hidden />
+                  {label}
+                </li>
+              ))}
+            </ul>
             </div>
 
             {/* Right Visual — keeps hero horizontal on desktop */}
@@ -222,8 +219,8 @@ export function DesktopHome({
       </section>
 
       {/* Routine — Cosmetics-style */}
-      <section className="bg-white py-14 border-b border-hairline">
-        <div className="container mx-auto px-6">
+      <section className="bg-canvas py-14 border-b border-hairline">
+        <div className="store-container">
           <div className="flex items-end justify-between gap-6 mb-8">
             <div>
               <h2 className="text-3xl font-bold text-ink mb-2">Shop by Routine</h2>
@@ -269,7 +266,7 @@ export function DesktopHome({
 
       {/* Best Sellers */}
       <section className="bg-surface-soft py-16">
-        <div className="container mx-auto px-6">
+        <div className="store-container">
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-ink mb-2">Best Sellers</h2>
@@ -295,8 +292,8 @@ export function DesktopHome({
       </section>
 
       {/* New Drops */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-6">
+      <section className="bg-canvas py-16">
+        <div className="store-container">
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-ink mb-2">New Drops</h2>
@@ -354,7 +351,7 @@ export function DesktopHome({
 
       {/* Ingredients Spotlight */}
       <section className="bg-surface-soft py-16">
-        <div className="container mx-auto px-6">
+        <div className="store-container">
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-ink mb-2">Ingredients Spotlight</h2>
@@ -397,8 +394,8 @@ export function DesktopHome({
       </section>
 
       {/* Reviews / UGC */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-6">
+      <section className="bg-canvas py-16">
+        <div className="store-container">
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-ink mb-2">Real Results</h2>
@@ -428,7 +425,7 @@ export function DesktopHome({
       </section>
 
       {/* Promos */}
-      <section className="container mx-auto px-6 py-16">
+      <section className="store-container py-16">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-ink mb-2">Seasonal Offers</h2>
@@ -491,7 +488,7 @@ export function DesktopHome({
 
       {/* Trust Section */}
       <section className="bg-ink text-white py-16">
-        <div className="container mx-auto px-6">
+        <div className="store-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">Kenapa SoraStore?</h2>
             <p className="text-white/70 text-lg">Beauty essentials dengan pengalaman belanja yang rapi.</p>

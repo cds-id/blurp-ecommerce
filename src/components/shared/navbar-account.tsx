@@ -74,7 +74,7 @@ export function DesktopNavbarAccount() {
         aria-expanded={open}
         className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-hairline hover:border-ink hover:shadow-md transition-all"
       >
-        <div className="w-7 h-7 rounded-full bg-ink text-white flex items-center justify-center text-[11px] font-semibold">
+        <div className="w-7 h-7 rounded-full bg-ink text-white flex items-center justify-center text-caption-2xs font-semibold">
           {initials}
         </div>
         <span className="hidden lg:inline text-sm font-medium text-ink max-w-[120px] truncate">
@@ -92,7 +92,7 @@ export function DesktopNavbarAccount() {
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-ink truncate">{displayName}</p>
               {isAdmin && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary text-micro font-semibold uppercase tracking-wider px-2 py-0.5">
                   <ShieldCheck className="w-3 h-3" />
                   Admin
                 </span>
@@ -210,7 +210,7 @@ export function MobileNavbarAccount({ closeMenu }: { closeMenu: () => void }) {
           <div className="flex items-center gap-2">
             <div className="text-sm font-semibold text-ink truncate">{displayName}</div>
             {isAdmin && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary text-nano font-semibold uppercase tracking-wider px-1.5 py-0.5">
                 Admin
               </span>
             )}

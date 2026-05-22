@@ -130,11 +130,11 @@ export function DesktopNavbar() {
 
     return (
       <div
-        className="absolute left-0 right-0 top-full z-50 border-b border-hairline bg-white/95 backdrop-blur"
+        className="absolute left-0 right-0 top-full z-50 border-b border-hairline bg-canvas shadow-sm"
         onMouseEnter={clearMegaCloseTimer}
         onMouseLeave={scheduleMegaClose}
       >
-        <div className="container mx-auto px-6 py-6">
+        <div className="store-container py-6">
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-4">
               <div className="text-xs uppercase tracking-wider text-muted">Explore</div>
@@ -192,7 +192,7 @@ export function DesktopNavbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white border-b border-hairline relative">
+      <header className="sticky top-0 z-50 w-full bg-canvas border-b border-hairline relative">
         {/* Desktop: logo | center menu | icons */}
         <div
           className="hidden md:grid grid-cols-[auto_1fr_auto] items-center px-6 h-16 gap-4"
@@ -241,7 +241,7 @@ export function DesktopNavbar() {
         }}
       >
         <DialogContent className="max-w-2xl rounded-2xl p-0 overflow-hidden">
-          <div className="p-6 border-b border-hairline bg-white">
+          <div className="p-6 border-b border-hairline bg-card">
             <DialogTitle className="text-base font-semibold text-ink">Search</DialogTitle>
             <div className="mt-4">
               <div
@@ -253,9 +253,10 @@ export function DesktopNavbar() {
               >
                 <Search className="w-4 h-4 text-muted shrink-0" />
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Cari produk"
                   placeholder="Cari skincare, makeup, fragrance..."
-                  className="flex-1 bg-transparent outline-none text-sm text-ink placeholder:text-muted"
+                  className="flex-1 bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-sm text-ink placeholder:text-muted"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
@@ -281,7 +282,7 @@ export function DesktopNavbar() {
                       <Link
                         key={p.id}
                         href={`/store/product/${p.slug}`}
-                        className="flex items-center gap-3 rounded-xl border border-hairline bg-white px-3 py-2.5 hover:bg-surface-soft transition-colors"
+                        className="flex items-center gap-3 rounded-xl border border-hairline bg-card px-3 py-2.5 hover:bg-surface-soft transition-colors"
                         onClick={() => setIsSearchOpen(false)}
                       >
                         <div className="h-12 w-12 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
@@ -333,7 +334,7 @@ export function DesktopNavbar() {
                 <Link
                   key={t.label}
                   href={t.href}
-                  className="rounded-xl border border-hairline bg-white px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-soft transition-colors"
+                  className="rounded-xl border border-hairline bg-card px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-soft transition-colors"
                   onClick={() => setIsSearchOpen(false)}
                 >
                   {t.label}
@@ -351,7 +352,7 @@ export function DesktopNavbar() {
             className="absolute inset-0 bg-ink/30"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="absolute right-0 top-0 bottom-0 z-[1] w-72 bg-white shadow-2xl flex flex-col translate-z-0">
+          <div className="absolute right-0 top-0 bottom-0 z-[1] w-72 bg-card shadow-2xl flex flex-col translate-z-0">
             <div className="flex items-center justify-between px-4 h-14 border-b shrink-0">
               <span className="font-semibold text-ink">Menu</span>
               <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
@@ -362,9 +363,10 @@ export function DesktopNavbar() {
               <div className="flex items-center gap-2 border border-hairline rounded-full px-4 py-2.5 mb-2">
                 <Search className="w-4 h-4 text-muted shrink-0" />
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Cari produk"
                   placeholder="Cari produk..."
-                  className="flex-1 bg-transparent outline-none text-sm"
+                  className="flex-1 bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-sm"
                 />
               </div>
               <div className="h-px bg-hairline my-2" />
@@ -424,7 +426,7 @@ function DesktopMobileMenuAccount({ onNavigate }: { onNavigate: () => void }) {
         <User className="w-5 h-5 text-muted" />
         <span className="flex-1 min-w-0">
           <span className="block truncate">{name}</span>
-          <span className="block text-[11px] text-muted truncate font-normal">{email}</span>
+          <span className="block text-caption-2xs text-muted truncate font-normal">{email}</span>
         </span>
       </Link>
       <Link

@@ -1,9 +1,9 @@
 "use client";
 
 import { use } from "react";
-import { useIsDesktop } from "@/src/hooks";
 import { DesktopOrderSuccess } from "@/src/components/desktop";
 import { MobileOrderSuccess } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 
 interface OrderPageProps {
   params: Promise<{ id: string }>;
@@ -11,11 +11,11 @@ interface OrderPageProps {
 
 export default function OrderPage({ params }: OrderPageProps) {
   const { id } = use(params);
-  const isDesktop = useIsDesktop();
 
-  return isDesktop ? (
-    <DesktopOrderSuccess orderId={id} />
-  ) : (
-    <MobileOrderSuccess orderId={id} />
+  return (
+    <ResponsiveSplit
+      desktop={<DesktopOrderSuccess orderId={id} />}
+      mobile={<MobileOrderSuccess orderId={id} />}
+    />
   );
 }

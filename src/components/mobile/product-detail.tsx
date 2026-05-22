@@ -103,12 +103,12 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {product.isNew && (
-            <Badge className="bg-white text-ink font-bold text-[10px] uppercase tracking-wide">
+            <Badge className="bg-white text-ink font-bold text-micro uppercase tracking-wide">
               BARU
             </Badge>
           )}
           {discount && (
-            <Badge className="bg-primary text-white font-bold text-[10px] uppercase tracking-wide">
+            <Badge className="bg-primary text-white font-bold text-micro uppercase tracking-wide">
               -{discount}%
             </Badge>
           )}
@@ -197,8 +197,11 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
               {product.colors.map((color) => (
                 <button
                   key={color.name}
+                  type="button"
+                  aria-label={`Warna ${color.name}`}
+                  aria-pressed={selectedColor === color.name}
                   className={cn(
-                    "h-12 w-12 rounded-full border-2 transition-all hover:scale-110",
+                    "h-12 w-12 rounded-full border-2 transition-all hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     selectedColor === color.name
                       ? "border-ink ring-2 ring-ink/20 scale-110"
                       : "border-hairline hover:border-ink"
@@ -345,7 +348,7 @@ export function MobileProductDetail({ product, defaultVariantId }: MobileProduct
       </div>
 
       {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-hairline px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-3 z-40 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-hairline px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-3 z-40 shadow-sticky-bar">
         <Button
           variant="outline"
           size="lg"

@@ -103,6 +103,7 @@ function ProfileView() {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 max-w-3xl">
+        <h1 className="sr-only">Akun saya</h1>
         {/* Header (guest or user) */}
         <div className="rounded-2xl border border-hairline bg-white p-5 md:p-6 shadow-sm">
           <div className="flex items-center gap-4">
@@ -120,7 +121,7 @@ function ProfileView() {
                   <p className="text-sm text-muted truncate">
                     {profile?.email ?? user?.email}
                     {profile?.is_admin && (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-micro font-semibold uppercase tracking-wider px-2 py-0.5">
                         Admin
                       </span>
                     )}
@@ -222,9 +223,9 @@ function ProfileView() {
 function SectionList({ title, items }: { title: string; items: ProfileSection[] }) {
   return (
     <div className="mt-6">
-      <h2 className="text-xs uppercase tracking-wider text-muted font-medium px-1 mb-2">
+      <h3 className="text-xs uppercase tracking-wider text-muted font-medium px-1 mb-2">
         {title}
-      </h2>
+      </h3>
       <ul className="rounded-2xl border border-hairline bg-white overflow-hidden divide-y divide-hairline">
         {items.map((item) => {
           const Icon = item.icon;
@@ -241,7 +242,7 @@ function SectionList({ title, items }: { title: string; items: ProfileSection[] 
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-ink truncate">{item.title}</p>
                     {item.badge && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-surface-soft text-muted border border-hairline px-2 py-0.5">
+                      <span className="text-micro font-semibold uppercase tracking-wider rounded-full bg-surface-soft text-muted border border-hairline px-2 py-0.5">
                         {item.badge}
                       </span>
                     )}

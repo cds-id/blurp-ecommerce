@@ -2,6 +2,8 @@
 
 import { DesktopShell } from "@/src/components/desktop";
 import { MobileShell } from "@/src/components/mobile";
+import { useIsDesktop } from "@/src/hooks/use-media-query";
+import { useHydrated } from "@/src/hooks/use-hydrated";
 
 interface StorefrontLayoutProps {
   children: React.ReactNode;
@@ -18,17 +20,20 @@ export function StorefrontLayout({
   mobileContent,
   mobileTitle,
 }: StorefrontLayoutProps) {
+  const hydrated = useHydrated();
+  const isDesktop = useIsDesktop();
   const desktopNode = desktopContent && mobileContent ? desktopContent : children;
   const mobileNode = desktopContent && mobileContent ? mobileContent : children;
 
-  return (
-    <>
-      <div className="hidden md:block">
-        <DesktopShell>{desktopNode}</DesktopShell>
-      </div>
-      <div className="md:hidden">
-        <MobileShell title={mobileTitle}>{mobileNode}</MobileShell>
-      </div>
-    </>
-  );
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-canvas" aria-busy="true" aria-label="Memuat" />
+    );
+  }
+
+  if (isDesktop) {
+    return <DesktopShell>{desktopNode}</DesktopShell>;
+  }
+
+  return <MobileShell title={mobileTitle}>{mobileNode}</MobileShell>;
 }

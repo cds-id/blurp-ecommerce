@@ -39,7 +39,7 @@ export function VariantSelector({
         <span className="text-sm font-semibold text-ink tracking-tight">Varian</span>
         {selected ? (
           <span
-            className="text-[11px] text-muted tabular-nums truncate max-w-[58%] text-right"
+            className="text-caption-2xs text-muted tabular-nums truncate max-w-[58%] text-right"
             title={selected.sku}
           >
             SKU {selected.sku}
@@ -89,11 +89,11 @@ export function VariantSelector({
                   {vo.name}
                 </p>
                 {showSummary ? (
-                  <p className="mt-0.5 text-[11px] text-muted leading-snug line-clamp-1" title={summary}>
+                  <p className="mt-0.5 text-caption-2xs text-muted leading-snug line-clamp-1" title={summary}>
                     {summary}
                   </p>
                 ) : null}
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0 text-[11px] tabular-nums">
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0 text-caption-2xs tabular-nums">
                   {showPrices ? (
                     <span className={cn("font-semibold", disabled ? "text-muted" : "text-ink")}>
                       {formatPrice(vo.priceIdr)}

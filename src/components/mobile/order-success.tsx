@@ -76,16 +76,16 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
       </div>
 
       <div className="p-4 space-y-4">
-        <div className="rounded-2xl border border-hairline bg-white p-4">
+        <div className="rounded-2xl border border-hairline bg-card p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-wider text-muted mb-0.5">No. pesanan</p>
+              <p className="text-caption-2xs uppercase tracking-wider text-muted mb-0.5">No. pesanan</p>
               <p className="font-mono font-semibold text-base text-ink">{orderId}</p>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 rounded-full"
+              className="h-11 w-11 p-0 rounded-full"
               onClick={() => copyToClipboard(orderId)}
               aria-label="Salin nomor pesanan"
             >
@@ -99,7 +99,7 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
                 {total ? formatPrice(total) : "—"}
               </div>
               {!isCancelled && (
-                <p className="text-[11px] text-emerald-600 inline-flex items-center gap-1">
+                <p className="text-caption-2xs text-emerald-600 inline-flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
                   Lunas via Xendit
                 </p>
@@ -109,24 +109,24 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
         </div>
 
         {isCancelled ? (
-          <div className="rounded-2xl border border-hairline bg-white p-4">
+          <div className="rounded-2xl border border-hairline bg-card p-4">
             <div className="flex items-start gap-3">
               <div className="h-9 w-9 rounded-full bg-red-50 ring-4 ring-red-100/60 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-4 h-4 text-red-600" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-ink">Pesanan dibatalkan</p>
-                <p className="text-[11px] text-muted mt-0.5">
+                <p className="text-caption-2xs text-muted mt-0.5">
                   Stok sudah dikembalikan. Jika sudah bayar, dana akan direfund.
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button asChild variant="outline" size="sm" className="rounded-full border-hairline h-8 text-xs">
+                  <Button asChild variant="outline" size="sm" className="rounded-full border-hairline h-10 text-xs min-h-11">
                     <Link href="/store/catalog">
                       <ShoppingBag className="w-3 h-3 mr-1" />
                       Belanja lagi
                     </Link>
                   </Button>
-                  <Button asChild size="sm" className="rounded-full h-8 text-xs">
+                  <Button asChild size="sm" className="rounded-full h-10 text-xs min-h-11">
                     <Link href="/kontak">
                       <MessageCircle className="w-3 h-3 mr-1" />
                       Hubungi CS
@@ -137,9 +137,9 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
             </div>
           </div>
         ) : (
-        <div className="rounded-2xl border border-hairline bg-white p-4">
+        <div className="rounded-2xl border border-hairline bg-card p-4">
           <h2 className="font-semibold text-sm mb-1">Status pesanan</h2>
-          <p className="text-[11px] text-muted mb-4">
+          <p className="text-caption-2xs text-muted mb-4">
             Update dikirim via email & WhatsApp.
           </p>
           <ol className="space-y-4">
@@ -151,7 +151,7 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
                   <div className="flex flex-col items-center">
                     <div
                       className={
-                        "h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-semibold transition-colors " +
+                        "h-9 w-9 rounded-full flex items-center justify-center text-caption-2xs font-semibold transition-colors " +
                         (isDone
                           ? "bg-ink text-white"
                           : isCurrent
@@ -178,7 +178,7 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
                     >
                       {s.label}
                     </p>
-                    <p className="text-[11px] text-muted">{s.description}</p>
+                    <p className="text-caption-2xs text-muted">{s.description}</p>
                   </div>
                 </li>
               );
@@ -199,7 +199,7 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-ink">Lacak pesanan</p>
-                <p className="text-[11px] text-muted">Pantau status & estimasi tiba</p>
+                <p className="text-caption-2xs text-muted">Pantau status & estimasi tiba</p>
               </div>
               <ArrowRight className="w-4 h-4 text-muted" />
             </Link>
@@ -212,7 +212,7 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-ink">Tanya CS</p>
-                <p className="text-[11px] text-muted">WA balas dalam 15 menit</p>
+                <p className="text-caption-2xs text-muted">WA balas dalam 15 menit</p>
               </div>
               <ArrowRight className="w-4 h-4 text-muted" />
             </Link>
@@ -220,14 +220,14 @@ export function MobileOrderSuccess({ orderId }: MobileOrderSuccessProps) {
         </div>
 
         {order?.guest_tracking_token && (
-          <div className="rounded-2xl border border-hairline bg-white p-4">
+          <div className="rounded-2xl border border-hairline bg-card p-4">
             <div className="flex items-start gap-3">
               <div className="h-9 w-9 rounded-full bg-emerald-50 ring-4 ring-emerald-100/60 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-ink">Simpan link pelacakan</p>
-                <p className="text-[11px] text-muted mt-0.5">
+                <p className="text-caption-2xs text-muted mt-0.5">
                   Tanpa akun, link inilah cara cek status pesanan kapan saja.
                 </p>
                 <button

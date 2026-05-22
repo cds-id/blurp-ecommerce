@@ -12,6 +12,7 @@ export function ChatBubble({ className }: ChatBubbleProps) {
   return (
     <Button
       size="icon"
+      aria-label="Chat WhatsApp"
       className={cn(
         "fixed bottom-6 right-4 h-14 w-14 rounded-full shadow-lg",
         "bg-primary text-primary-foreground hover:bg-primary/90 ring-1 ring-black/10 shadow-xl outline outline-1 outline-white/30",

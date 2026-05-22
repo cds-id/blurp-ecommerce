@@ -93,12 +93,12 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
           <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/70 to-transparent" />
         </div>
 
-        <div className="relative container mx-auto px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center py-5 lg:py-6">
-          <div className="w-full max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_408px] gap-10 lg:gap-14 items-center">
+        <div className="relative store-container lg:px-8 min-h-[calc(100vh-4rem)] flex items-center py-5 lg:py-6 max-w-7xl xl:max-w-[1400px]">
+          <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_408px] gap-10 lg:gap-14 items-center">
             <div className="text-white space-y-4 max-w-lg">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1 mb-4">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider">Magic link terkirim</span>
+                <div className="inline-flex items-center gap-2 hero-chip px-3 py-1 mb-4">
+                  <span className="text-caption-2xs font-semibold uppercase tracking-wider">Magic link terkirim</span>
                 </div>
                 <h1 className="text-4xl xl:text-5xl font-bold tracking-tight leading-[1.05] mb-3">
                   Cek inbox email kamu
@@ -110,7 +110,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
             </div>
 
             <div className="w-full">
-              <div className="rounded-3xl border border-white/20 bg-white p-7 shadow-2xl backdrop-blur-sm text-center">
+              <div className="login-panel p-7 text-center">
                 <div className="h-16 w-16 rounded-full bg-emerald-50 ring-4 ring-emerald-100 flex items-center justify-center mx-auto mb-5">
                   <MailCheck className="h-8 w-8 text-emerald-600" />
                 </div>
@@ -171,12 +171,12 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
         <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/70 to-transparent" />
       </div>
 
-        <div className="relative container mx-auto px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center py-4 lg:py-5">
-          <div className="w-full max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_408px] gap-8 lg:gap-12 items-center">
+        <div className="relative store-container lg:px-8 min-h-[calc(100vh-4rem)] flex items-center py-4 lg:py-5 max-w-7xl xl:max-w-[1400px]">
+          <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_408px] gap-8 lg:gap-12 items-center">
           <div className="text-white space-y-3 lg:pr-6">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1 mb-3">
-                <span className="text-[11px] font-semibold uppercase tracking-wider">Magic link</span>
+              <div className="inline-flex items-center gap-2 hero-chip px-3 py-1 mb-3">
+                <span className="text-caption-2xs font-semibold uppercase tracking-wider">Magic link</span>
               </div>
               <h1 className="text-4xl xl:text-5xl font-bold tracking-tight leading-[1.05] mb-2">
                 Masuk ke SoraStore
@@ -217,7 +217,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
               <Button
                 asChild
                 variant="outline"
-                className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/40 hover:text-white h-10 px-5 text-sm backdrop-blur-sm"
+                className="rounded-full border border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/40 hover:text-white h-10 min-h-11 px-5 text-sm"
               >
                 <Link href="/store/catalog">
                   Lanjut belanja
@@ -236,7 +236,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
           </div>
 
           <div className="w-full">
-            <div className="rounded-3xl border border-white/20 bg-white p-7 shadow-2xl backdrop-blur-sm">
+            <div className="login-panel p-7">
               <div className="mb-6">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary text-white mb-4">
                   <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor">
@@ -249,15 +249,18 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
 
               <form onSubmit={onSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-ink">Email</label>
+                  <label htmlFor="login-email-desktop" className="text-xs font-semibold text-ink">
+                    Email
+                  </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" aria-hidden />
                     <Input
+                      id="login-email-desktop"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="kamu@email.com"
-                      className="h-11 pl-10 text-sm rounded-xl border-hairline focus-visible:ring-2 focus-visible:ring-primary"
+                      className="h-11 pl-10 text-sm rounded-xl border-hairline focus-visible:ring-2 focus-visible:ring-ring"
                       required
                       autoComplete="email"
                       inputMode="email"
@@ -275,13 +278,15 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
                   {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
                 </Button>
                 {error && (
-                  <p className="text-xs text-red-600 text-center">{error}</p>
+                  <p className="text-xs text-destructive text-center" role="alert">
+                    {error}
+                  </p>
                 )}
               </form>
 
               <div className="relative my-5 flex items-center">
                 <div className="flex-1 h-px bg-hairline" />
-                <span className="px-3 text-[10px] uppercase tracking-wider text-muted font-semibold">atau</span>
+                <span className="px-3 text-micro uppercase tracking-wider text-muted font-semibold">atau</span>
                 <div className="flex-1 h-px bg-hairline" />
               </div>
 
@@ -321,7 +326,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
                 >
                   ← Lanjut sebagai tamu
                 </Link>
-                <p className="text-center text-[10px] text-muted leading-relaxed">
+                <p className="text-center text-micro text-muted leading-relaxed">
                   Dengan masuk, kamu menyetujui{" "}
                   <Link href="/terms" className="text-ink hover:underline underline-offset-2 font-medium">
                     Syarat
@@ -344,7 +349,7 @@ function DesktopLoginView({ email, setEmail, sent, setSent, onSubmit, submitting
 function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting, error }: ViewProps) {
   if (sent) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] flex flex-col px-6 pt-12 pb-8 bg-white">
+      <div className="min-h-[calc(100vh-3.5rem)] flex flex-col px-6 pt-12 pb-8 bg-canvas">
         <Link href="/store/catalog" className="self-start text-ink/70 -ml-1 mb-6 inline-flex items-center text-sm">
           <ArrowLeft className="w-5 h-5 mr-1" />
           Kembali
@@ -385,7 +390,7 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting,
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex flex-col bg-white">
+    <div className="min-h-[calc(100vh-3.5rem)] flex flex-col bg-canvas">
       <div className="px-6 pt-8 pb-6">
         <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-primary text-white mb-5">
           <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor">
@@ -401,15 +406,18 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting,
       <div className="px-6 flex-1">
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-ink/80">Email</label>
+            <label htmlFor="login-email-mobile" className="text-xs font-medium text-ink">
+              Email
+            </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" aria-hidden />
               <Input
+                id="login-email-mobile"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="kamu@email.com"
-                className="h-12 pl-10 rounded-xl border-hairline focus-visible:ring-ink text-base"
+                className="h-12 min-h-11 pl-10 rounded-xl border-hairline focus-visible:ring-2 focus-visible:ring-ring text-base"
                 required
                 autoComplete="email"
                 inputMode="email"
@@ -427,13 +435,15 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting,
             {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
           </Button>
           {error && (
-            <p className="text-xs text-red-600 text-center mt-2">{error}</p>
+            <p className="text-xs text-destructive text-center mt-2" role="alert">
+              {error}
+            </p>
           )}
         </form>
 
         <div className="relative my-5 flex items-center">
           <div className="flex-1 h-px bg-hairline" />
-          <span className="px-3 text-[11px] uppercase tracking-wider text-muted">atau</span>
+          <span className="px-3 text-caption-2xs uppercase tracking-wider text-muted">atau</span>
           <div className="flex-1 h-px bg-hairline" />
         </div>
 
@@ -467,7 +477,7 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting,
           </Link>
         </div>
 
-        <p className="text-[11px] text-muted text-center mt-5 leading-relaxed">
+        <p className="text-caption-2xs text-muted text-center mt-5 leading-relaxed">
           Dengan masuk, kamu menyetujui{" "}
           <Link href="/terms" className="text-ink underline underline-offset-2">
             Syarat
@@ -488,7 +498,7 @@ function MobileLoginView({ email, setEmail, sent, setSent, onSubmit, submitting,
           <ShoppingBag className="w-4 h-4" />
           Lanjut sebagai tamu
         </Link>
-        <p className="text-center text-[11px] text-muted mt-3">
+        <p className="text-center text-caption-2xs text-muted mt-3">
           Belanja tanpa akun tetap bisa dilacak via halaman pelacakan.
         </p>
       </div>

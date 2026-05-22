@@ -54,7 +54,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="container mx-auto px-6 py-10 max-w-3xl">
+      <div className="store-container py-10 max-w-3xl">
         {/* Success / Cancelled Header */}
         <div className="text-center mb-8">
           {isCancelled ? (
@@ -81,7 +81,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
         </div>
 
         {/* Order ID + Total card */}
-        <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+        <div className="rounded-2xl border border-hairline bg-card p-6 mb-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
               <p className="text-xs uppercase tracking-wider text-muted mb-1">Nomor pesanan</p>
@@ -118,7 +118,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
 
         {/* Status timeline OR cancelled banner */}
         {isCancelled ? (
-          <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+          <div className="rounded-2xl border border-hairline bg-card p-6 mb-6">
             <div className="flex items-start gap-3">
               <div className="h-10 w-10 rounded-full bg-red-50 ring-4 ring-red-100/60 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -147,7 +147,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
             </div>
           </div>
         ) : (
-        <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+        <div className="rounded-2xl border border-hairline bg-card p-6 mb-6">
           <h2 className="font-semibold text-lg mb-1">Status pesanan</h2>
           <p className="text-xs text-muted mb-5">
             Update otomatis akan dikirim ke email & WhatsApp kamu.
@@ -198,7 +198,7 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
         )}
 
         {order?.guest_tracking_token && (
-          <div className="rounded-2xl border border-hairline bg-white p-6 mb-6">
+          <div className="rounded-2xl border border-hairline bg-card p-6 mb-6">
             <div className="flex items-start gap-3">
               <div className="h-10 w-10 rounded-full bg-emerald-50 ring-4 ring-emerald-100/60 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -212,12 +212,13 @@ export function DesktopOrderSuccess({ orderId }: DesktopOrderSuccessProps) {
                 <div className="mt-3 flex items-center gap-2">
                   <input
                     readOnly
+                    aria-label="Link pelacakan pesanan"
                     value={
                       typeof window !== "undefined"
                         ? `${window.location.origin}${trackerHref}`
                         : trackerHref
                     }
-                    className="flex-1 h-9 rounded-lg border border-hairline bg-surface-soft px-3 text-xs font-mono text-ink/80 select-all"
+                    className="flex-1 h-9 rounded-lg border border-hairline bg-surface-soft px-3 text-xs font-mono text-ink/80 select-all focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   <Button
                     variant="outline"
@@ -303,7 +304,7 @@ function NextStepCard({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-hairline bg-white p-4 hover:bg-surface-strong transition-colors"
+      className="rounded-xl border border-hairline bg-card p-4 hover:bg-surface-strong transition-colors"
     >
       <div className="h-9 w-9 rounded-full bg-surface-soft flex items-center justify-center mb-3">
         <Icon className="w-4 h-4 text-ink" />

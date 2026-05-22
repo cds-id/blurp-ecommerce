@@ -246,7 +246,7 @@ export function LocationPicker({ value, onChange, enableSearch = true }: Props) 
                     className="w-full text-left px-3 py-2.5 hover:bg-surface-soft transition-colors"
                   >
                     <p className="text-sm font-medium text-ink truncate">{r.label}</p>
-                    <p className="text-[11px] text-muted mt-0.5">
+                    <p className="text-caption-2xs text-muted mt-0.5">
                       {[r.district, r.city, r.province, r.postal_code].filter(Boolean).join(" · ")}
                     </p>
                   </button>

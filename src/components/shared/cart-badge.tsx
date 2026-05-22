@@ -8,7 +8,7 @@ type CartBadgePlacement = "corner" | "inline";
 
 const sizeClasses: Record<CartBadgeSize, string> = {
   xs: "h-4 w-4 text-xs",
-  sm: "h-4 w-4 text-[10px]",
+  sm: "h-4 w-4 text-micro",
   md: "h-5 w-5 text-xs",
 };
 

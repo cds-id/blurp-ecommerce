@@ -84,7 +84,7 @@ export function MobileCart() {
         {items.map((item) => (
           <li
             key={item.key}
-            className="rounded-2xl border border-hairline bg-white p-3"
+            className="rounded-2xl border border-hairline bg-card p-3"
           >
             <div className="flex gap-3">
               <Link
@@ -106,7 +106,7 @@ export function MobileCart() {
                 >
                   {item.li.product_name}
                 </Link>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted">
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-caption-2xs text-muted">
                   <span className="px-1.5 py-0.5 rounded-full bg-surface-soft border border-hairline text-ink/70">
                     {item.li.variant_name}
                   </span>
@@ -121,7 +121,7 @@ export function MobileCart() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 rounded-full text-muted hover:text-destructive px-3"
+                className="h-10 min-h-11 rounded-full text-muted hover:text-destructive px-3"
                 onClick={() => removeItem(item.li.cart_item_id)}
               >
                 <Trash2 className="h-4 w-4 mr-1.5" />
@@ -165,7 +165,7 @@ export function MobileCart() {
       </div>
 
       {/* Sticky Bottom Checkout Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-hairline px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-hairline px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-sticky-bar">
         <div className="flex items-baseline justify-between mb-3">
           <span className="text-xs text-muted">Total ({totalUnits} barang)</span>
           <span className="text-lg font-semibold tabular-nums">{formatPrice(subtotal)}</span>

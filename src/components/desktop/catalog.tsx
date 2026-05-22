@@ -78,7 +78,7 @@ export function DesktopCatalog({
   return (
     <div className="bg-background min-h-screen">
       {/* Breadcrumb */}
-      <div className="container mx-auto px-6 py-4">
+      <div className="store-container py-4">
         <nav className="flex items-center text-sm text-muted-foreground">
           <Link href="/" className="hover:text-foreground transition-colors">
             Beranda
@@ -88,7 +88,7 @@ export function DesktopCatalog({
         </nav>
       </div>
 
-      <div className="container mx-auto px-6 pb-12">
+      <div className="store-container pb-12">
         <div className="grid grid-cols-[240px_1fr] gap-8">
           {/* Sidebar Filters */}
           <aside className="space-y-6">
@@ -276,6 +276,8 @@ export function DesktopCatalog({
                     variant={viewMode === "grid" ? "secondary" : "ghost"}
                     size="icon"
                     className="rounded-none rounded-l-md"
+                    aria-label="Tampilan grid"
+                    aria-pressed={viewMode === "grid"}
                     onClick={() => setViewMode("grid")}
                   >
                     <Grid3X3 className="h-4 w-4" />
@@ -284,6 +286,8 @@ export function DesktopCatalog({
                     variant={viewMode === "list" ? "secondary" : "ghost"}
                     size="icon"
                     className="rounded-none rounded-r-md"
+                    aria-label="Tampilan daftar"
+                    aria-pressed={viewMode === "list"}
                     onClick={() => setViewMode("list")}
                   >
                     <List className="h-4 w-4" />

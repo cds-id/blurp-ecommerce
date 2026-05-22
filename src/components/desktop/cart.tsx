@@ -38,10 +38,10 @@ export function DesktopCart() {
   if (showSkeleton) {
     return (
       <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-6 pt-6">
+        <div className="store-container pt-6">
           <Skeleton className="h-4 w-48" />
         </div>
-        <div className="container mx-auto px-6 pt-4 pb-12">
+        <div className="store-container pt-4 pb-12">
           <div className="flex items-end justify-between mb-6">
             <div className="space-y-2">
               <Skeleton className="h-9 w-48" />
@@ -50,13 +50,13 @@ export function DesktopCart() {
             <Skeleton className="h-4 w-32" />
           </div>
           <div className="grid grid-cols-[1fr_380px] gap-8">
-            <div className="rounded-2xl border border-hairline bg-white p-5 space-y-4">
+            <div className="rounded-2xl border border-hairline bg-card p-5 space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <CartItemSkeleton key={i} />
               ))}
             </div>
             <aside className="space-y-4">
-              <div className="rounded-2xl border border-hairline bg-white p-6 space-y-4">
+              <div className="rounded-2xl border border-hairline bg-card p-6 space-y-4">
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="h-3 w-full" />
                 <Skeleton className="h-3 w-2/3" />
@@ -74,14 +74,14 @@ export function DesktopCart() {
   if (items.length === 0) {
     return (
       <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-6 pt-6">
+        <div className="store-container pt-6">
           <nav className="flex items-center text-sm text-muted">
             <Link href="/" className="hover:text-ink transition-colors">Beranda</Link>
             <ChevronRight className="h-4 w-4 mx-2" />
             <span className="text-ink font-medium">Keranjang</span>
           </nav>
         </div>
-        <div className="container mx-auto px-6 py-20 text-center">
+        <div className="store-container py-20 text-center">
           <div className="mx-auto mb-5 h-20 w-20 rounded-full bg-surface-soft flex items-center justify-center">
             <ShoppingBag className="h-9 w-9 text-muted" />
           </div>
@@ -104,7 +104,7 @@ export function DesktopCart() {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="container mx-auto px-6 pt-6">
+      <div className="store-container pt-6">
         <nav className="flex items-center text-sm text-muted">
           <Link href="/" className="hover:text-ink transition-colors">Beranda</Link>
           <ChevronRight className="h-4 w-4 mx-2" />
@@ -112,7 +112,7 @@ export function DesktopCart() {
         </nav>
       </div>
 
-      <div className="container mx-auto px-6 pt-4 pb-12">
+      <div className="store-container pt-4 pb-12">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Keranjang</h1>
@@ -132,7 +132,7 @@ export function DesktopCart() {
 
         <div className="grid grid-cols-[1fr_380px] gap-8">
           {/* Cart Items */}
-          <div className="rounded-2xl border border-hairline bg-white overflow-hidden">
+          <div className="rounded-2xl border border-hairline bg-card overflow-hidden">
             <ul className="divide-y divide-hairline">
               {items.map((item) => (
                 <li key={item.key} className="p-5 flex gap-5">
@@ -201,7 +201,7 @@ export function DesktopCart() {
 
           {/* Order Summary */}
           <aside className="h-fit sticky top-24 space-y-4">
-            <div className="rounded-2xl border border-hairline bg-white p-6">
+            <div className="rounded-2xl border border-hairline bg-card p-6">
               <h2 className="font-semibold text-lg">Ringkasan</h2>
 
               <dl className="mt-4 space-y-3 text-sm">
@@ -234,7 +234,7 @@ export function DesktopCart() {
                 </Link>
               </Button>
 
-              <p className="mt-3 text-[11px] text-muted text-center leading-relaxed">
+              <p className="mt-3 text-caption-2xs text-muted text-center leading-relaxed">
                 Harga sudah termasuk pajak. Ongkir & promo dihitung di langkah berikutnya.
               </p>
             </div>

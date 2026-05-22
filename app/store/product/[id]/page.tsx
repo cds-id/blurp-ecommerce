@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DesktopProductDetail } from "@/src/components/desktop";
 import { MobileProductDetail } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 import { getCatalogProductDetail, listCatalogCategories } from "@/src/lib/catalog/server";
 import { toUiProductDetail } from "@/src/lib/catalog/adapters";
 
@@ -27,13 +28,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       : null;
 
   return (
-    <>
-      <div className="hidden md:block">
-        <DesktopProductDetail product={product} defaultVariantId={firstVariantId} />
-      </div>
-      <div className="md:hidden">
-        <MobileProductDetail product={product} defaultVariantId={firstVariantId} />
-      </div>
-    </>
+    <ResponsiveSplit
+      desktop={<DesktopProductDetail product={product} defaultVariantId={firstVariantId} />}
+      mobile={<MobileProductDetail product={product} defaultVariantId={firstVariantId} />}
+    />
   );
 }

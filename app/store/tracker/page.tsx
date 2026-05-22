@@ -211,7 +211,7 @@ function ManualTracker() {
           <Button
             asChild
             variant="outline"
-            className="rounded-full border-hairline shrink-0 hidden sm:inline-flex"
+            className="rounded-full border-hairline shrink-0 hidden md:inline-flex"
           >
             <Link href="/store/catalog">
               <ShoppingBag className="w-4 h-4 mr-2" />
@@ -233,7 +233,7 @@ function ManualTracker() {
                 placeholder="ORD-12345"
                 className="h-11 rounded-xl border-hairline"
               />
-              <p className="text-[11px] text-muted">Diawali dengan ORD-.</p>
+              <p className="text-caption-2xs text-muted">Diawali dengan ORD-.</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs uppercase tracking-wider text-muted font-medium">
@@ -246,7 +246,7 @@ function ManualTracker() {
                 inputMode="numeric"
                 className="h-11 rounded-xl border-hairline"
               />
-              <p className="text-[11px] text-muted">Sama dengan saat checkout.</p>
+              <p className="text-caption-2xs text-muted">Sama dengan saat checkout.</p>
             </div>
           </div>
 
@@ -430,7 +430,7 @@ function ManualTracker() {
                             {s.label}
                           </p>
                           {isCurrent && (
-                            <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary/10 text-primary px-2 py-0.5">
+                            <span className="text-micro font-semibold uppercase tracking-wider rounded-full bg-primary/10 text-primary px-2 py-0.5">
                               Saat ini
                             </span>
                           )}
@@ -575,7 +575,7 @@ function TokenTracker({ token }: { token: string }) {
           <Button
             asChild
             variant="outline"
-            className="rounded-full border-hairline shrink-0 hidden sm:inline-flex"
+            className="rounded-full border-hairline shrink-0 hidden md:inline-flex"
           >
             <Link href="/store/catalog">
               <ShoppingBag className="w-4 h-4 mr-2" />
@@ -687,7 +687,7 @@ function TokenOrderDetail({ order }: { order: OrderDetail }) {
             Dibuat: {new Date(order.created_at).toLocaleString("id-ID")}
           </p>
         )}
-        <p className="text-[11px] text-muted mt-1">
+        <p className="text-caption-2xs text-muted mt-1">
           Status backend: <span className="font-medium text-ink/70">{order.status}</span>
         </p>
       </div>
@@ -745,7 +745,7 @@ function TokenOrderDetail({ order }: { order: OrderDetail }) {
                       {s.label}
                     </p>
                     {isCurrent && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary/10 text-primary px-2 py-0.5">
+                      <span className="text-micro font-semibold uppercase tracking-wider rounded-full bg-primary/10 text-primary px-2 py-0.5">
                         Saat ini
                       </span>
                     )}
@@ -769,7 +769,7 @@ function TokenOrderDetail({ order }: { order: OrderDetail }) {
                   <p className="text-sm font-medium text-ink line-clamp-1">
                     {it.product_name}
                   </p>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-caption-2xs text-muted">
                     {it.variant_name} · {it.quantity}×
                   </p>
                 </div>

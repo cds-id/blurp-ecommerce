@@ -60,12 +60,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {/* Badges - Top Left */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.isNew && (
-              <Badge className="bg-white text-ink text-[10px] font-bold uppercase tracking-wide shadow-sm">
+              <Badge className="bg-white text-ink text-micro font-bold uppercase tracking-wide shadow-sm">
                 BARU
               </Badge>
             )}
             {discount && (
-              <Badge className="bg-primary text-white text-[10px] font-bold uppercase tracking-wide">
+              <Badge className="bg-primary text-white text-micro font-bold uppercase tracking-wide">
                 -{discount}%
               </Badge>
             )}

@@ -1,5 +1,6 @@
 import { DesktopHome } from "@/src/components/desktop";
 import { MobileHome } from "@/src/components/mobile";
+import { ResponsiveSplit } from "@/src/components/responsive-split";
 import { listCatalogCategories, listCatalogProducts } from "@/src/lib/catalog/server";
 import { toUiCategories, toUiProduct } from "@/src/lib/catalog/adapters";
 
@@ -19,13 +20,13 @@ export default async function HomePage() {
   const newDrops = products.slice(4, 8);
 
   return (
-    <>
-      <div className="hidden md:block">
+    <ResponsiveSplit
+      desktop={
         <DesktopHome featuredProducts={featuredProducts} newDrops={newDrops} categories={uiCats} />
-      </div>
-      <div className="md:hidden">
+      }
+      mobile={
         <MobileHome featuredProducts={featuredProducts} newDrops={newDrops} categories={uiCats} />
-      </div>
-    </>
+      }
+    />
   );
 }

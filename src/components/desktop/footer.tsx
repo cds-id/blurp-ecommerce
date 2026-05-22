@@ -24,8 +24,8 @@ const footerLinks = {
 
 export function DesktopFooter() {
   return (
-    <footer className="bg-white border-t border-hairline">
-      <div className="container mx-auto px-6">
+    <footer className="bg-canvas border-t border-hairline">
+      <div className="store-container">
         {/* Top Footer */}
         <div className="py-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
